@@ -44,7 +44,7 @@ Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float 
 
 	// Create Bullet Pool
 	for (int i = 0; i < 10; i++) {
-		PlayerBullet tmpBullet(renderer, bulletPath, -1000, -1000, 0, 0);
+		PlayerBullet tmpBullet(renderer, bulletPath, -5000, -5000, 0, 0);
 		bulletList.push_back(tmpBullet);
 	}
 
@@ -97,23 +97,23 @@ void Player::Update(float deltaTime){
 		pos_Y = posRect.y;
 	}
 
-	//		//Update the players bullets
-	//		for (int i = 0; i < bulletList.size(); i++) {
-	//			if (bulletList[i].active) {
-	//				bulletList[i].Update(deltaTime);
-	//			}
-	//		}
+	//Update the players bullets
+	for (int i = 0; i < bulletList.size(); i++) {
+		if (bulletList[i].active) {
+			bulletList[i].Update(deltaTime);
+		}
+	}
 
 }
 
 void Player::Draw(SDL_Renderer *renderer){
 
-	//	// Draw Bullets
-	//	for (int i = 0; i < bulletList.size(); i++) {
-	//		if (bulletList[i].active) {
-	//			bulletList[i].Draw(renderer);
-	//		}
-	//	}
+	// Draw Bullets
+	for (int i = 0; i < bulletList.size(); i++) {
+		if (bulletList[i].active) {
+			bulletList[i].Draw(renderer);
+		}
+	}
 
 	// Draw the player texture using the vars texture and posRect
 	SDL_RenderCopyEx(renderer, texture, NULL, &posRect, playerangle, &center, SDL_FLIP_NONE);
@@ -145,13 +145,60 @@ void Player::OnControllerButton(const SDL_ControllerButtonEvent event){
 	cout << "fire" << endl;
 
 	//if josytick is 0
-			if (event.which == 0) {
-				//if A button
-				if (event.button == 0) {
+	if (event.which == 0) {
+		//if A button
+		if (event.button == 0) {
 
-					//createBullet
-					//CreateBullet();
-				}
+			//createBullet
+			CreateBullet();
+		}
+	}
+
+}
+
+void  Player::CreateBullet(){
+
+	// If there is a active bullet to fire
+	for (int i = 0; i < bulletList.size(); i++) {
+
+		// If the bullet is not active
+		if (bulletList[i].active == false) {
+
+			// Play the Fire sound - plays fine through levels, must pause for QUIT
+			Mix_PlayChannel(-1, fire, 0);
+
+			// Set bullet to active
+			bulletList[i].active = true;
+
+			// Use the same math in the x position to get the bullet close to the center of the player using player width
+			bulletList[i].posRect.x = (posRect.x + (posRect.w / 2));
+			bulletList[i].posRect.y = (posRect.y + (posRect.h / 2));
+
+			// Finishing aligning to the players center using the texture width
+			bulletList[i].posRect.x = (bulletList[i].posRect.x
+				- (bulletList[i].posRect.w / 2));
+			bulletList[i].posRect.y = (bulletList[i].posRect.y
+				- (bulletList[i].posRect.h / 2));
+
+			// Set the x and y position of the bullets float position
+			bulletList[i].pos_X = bulletList[i].posRect.x;
+			bulletList[i].pos_Y = bulletList[i].posRect.y;
+
+			// IF the tank is moving, fire in that Direction
+			if (Xvalue != 0 || Yvalue != 0) {
+				// Set the x and y pos of the bullet's float pos
+				bulletList[i].playerangle = playerangle;
+
 			}
+			else {
+				// If the tank isnt moving, fire the direction currently facing & Set the x and y pos of the bullet's float pos
+				bulletList[i].playerangle = oldAngle;
+
+			}
+
+			// Once bullet is found, break out of loop
+			break;
+		}
+	}
 
 }

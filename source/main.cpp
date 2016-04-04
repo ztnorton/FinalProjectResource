@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <time.h>
 #include "player.h"
+#include "menu.h"
 
 
 using namespace std;
@@ -60,6 +61,7 @@ string images_dir = currentWorkingDirectory + "/FinalProjectResource/image/";
 string audio_dir = currentWorkingDirectory + "/FinalProjectResource/audio/";
 #endif
 
+
 // ******** MAIN START **********
 int main(int argc, char* argv[]) {
 
@@ -81,8 +83,6 @@ int main(int argc, char* argv[]) {
 
 
 	// **** Variable Creation - START ****
-	// Main Loop flag
-	bool quit = false;
 
 	// Event Handler
 	SDL_Event e;
@@ -100,89 +100,460 @@ int main(int argc, char* argv[]) {
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 
 	// **** Create Players - START ****
-	Player player = Player(renderer, images_dir.c_str(), audio_dir.c_str(), 512.0f, 384.0f);
+	Player player = Player(renderer, images_dir.c_str(), audio_dir.c_str(), 950.0f, 384.0f);
 
-	// **** Background Texture - START ****
-	SDL_Texture *bkgd = IMG_LoadTexture(renderer,
-			(images_dir + "mainMenu.png").c_str());
+	// **** MainMenu Textures - START ****
+	Menu MainMenu = Menu(renderer, images_dir.c_str(), "mainMenu.png", 0.0f, 0.0f);
+	Menu Level1 = Menu(renderer, images_dir.c_str(), "level1.png", 0.0f, 0.0f);
+	Menu Level2 = Menu(renderer, images_dir.c_str(), "level2.png", 0.0f, 0.0f);
+	Menu Instructions = Menu(renderer, images_dir.c_str(), "instructions.png", 0.0f, 0.0f);
+	Menu Backstory = Menu(renderer, images_dir.c_str(), "backstory.png", 0.0f, 0.0f);
+	Menu Win = Menu(renderer, images_dir.c_str(), "win.png", 0.0f, 0.0f);
+	Menu Lose = Menu(renderer, images_dir.c_str(), "win.png", 0.0f, 0.0f);
 
-	SDL_Rect bkgdRect;
+	// **** Set Up Game State Enums
+	enum GameState {
+		MENU, INSTRUCTIONS, BACKSTORY, LEVEL1, LEVEL2, WIN, LOSE
+	};
 
-	bkgdRect.x = 0;
-	bkgdRect.y = 0;
-	bkgdRect.w = 1024;
-	bkgdRect.h = 768;
+	GameState gameState = MENU;
 
-	float X_pos = 0.0f;
-	float Y_pos = 0.0f;
+	// bools for menu switching
+	bool menu= false; bool instructions= false; bool backstory= false; bool level1= false; bool level2= false; bool win= false; bool lose= false; bool quit = false;
+
+
 
 	// **** MAIN LOOP GAME START ****
 
 	while (!quit) {
 
-		// Create deltaTime
-		thisTime = SDL_GetTicks();
-		deltaTime = (float)(thisTime - lastTime) / 1000;
-		lastTime = thisTime;
+		switch (gameState) {
+		// *********************************************************************************************************
+		case MENU:
+			menu = true;
+			cout << "The Game State is Menu..." << endl;
+			cout << "Press A Button for level 1..." << endl;
+			cout << "Press B Button for Instructions..." << endl;
+			cout << "Press X Button for BackStory..." << endl;
 
-		// Handle Events on Queue - Key press and such - START ****
-		while (SDL_PollEvent(&e) != 0) {
+			while (menu) {
 
-			// User Requests quit
-			if (e.type == SDL_QUIT) {
-				quit = true;
+				// Create deltaTime
+				thisTime = SDL_GetTicks();
+				deltaTime = (float)(thisTime - lastTime) / 1000;
+				lastTime = thisTime;
+
+				// Handle Events on Queue - Key press and such - START ****
+				while (SDL_PollEvent(&e) != 0) {
+
+					// User Requests quit
+					if (e.type == SDL_QUIT) {
+						quit = true;
+						menu = false;
+						break;
+					}
+
+					switch (e.type) {
+
+					case SDL_CONTROLLERBUTTONDOWN:
+
+						if (e.cdevice.which == 0) {
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
+
+								menu = false;
+								gameState = LEVEL1;
+							}
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
+
+								menu = false;
+								gameState = INSTRUCTIONS;
+							}
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_X) {
+
+								menu = false;
+								gameState = BACKSTORY;
+							}
+						}
+						break;
+
+					}
+
+				} // END POLL EVENT
+
+				// **** DRAW PROCESS ****
+				//Clear the SDL RenderTarget
+				SDL_RenderClear(renderer);
+
+				// Draw the main menu
+				MainMenu.Draw(renderer);
+
+				// Present screen render
+				SDL_RenderPresent(renderer);
 			}
+			break; //end main menu case
 
-			switch (e.type) {
+		// *********************************************************************************************************
+		case LEVEL1:
+			level1 = true;
+			cout << "The Game State is LEVEL 1..." << endl;
+			cout << "Press A Button for firing ..." << endl;
+			cout << "Press X Button for LEVEL 2 ..." << endl;
 
-			case SDL_CONTROLLERBUTTONDOWN:
+			while (level1){
 
-				if (e.cdevice.which == 0) {
+				//set up frame rate for the section, or CASE
+				thisTime = SDL_GetTicks();
+				deltaTime = (float) (thisTime - lastTime) / 1000;
+				lastTime = thisTime;
 
-					if (e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
+				// check for input events
+				while (SDL_PollEvent(&e) != 0) {
 
-						player.OnControllerButton(e.cbutton);
+					//check to see if the SDL Window is closed - player clicks X in Window
+					if (e.type == SDL_QUIT) {
+						quit = true;
+						level1 = false;
+						break;
+
+					}
+					switch (e.type) {
+
+					case SDL_CONTROLLERBUTTONDOWN:
+
+						if (e.cdevice.which == 0) {
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
+
+								player.OnControllerButton(e.cbutton);
+								break;
+							}
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_X) {
+
+								level1 = false;
+								gameState = LEVEL2;
+							}
+
+						}
+						break;
+
+					}
+				}
+
+				// Get x and Y values from game controller
+				const Sint16 Xvalue = SDL_GameControllerGetAxis(gGameControllerO,
+						SDL_CONTROLLER_AXIS_LEFTX);
+				const Sint16 Yvalue = SDL_GameControllerGetAxis(gGameControllerO,
+						SDL_CONTROLLER_AXIS_LEFTY);
+
+				// Pass values to method
+				player.OnControllerAxis(Xvalue, Yvalue);
+
+				// **** Update
+				// Update player
+				player.Update(deltaTime);
+
+				// **** Draw
+
+				//Clear the SDL RenderTarget
+				SDL_RenderClear(renderer);
+
+				// Draw the main menu
+				Level1.Draw(renderer);
+
+				// Player Draw
+				player.Draw(renderer);
+
+				// Present screen render
+				SDL_RenderPresent(renderer);
+			}
+			break; //end level1 case
+
+		// *********************************************************************************************************
+		case LEVEL2:
+			level2 = true;
+			cout << "The Game State is LEVEL 2..." << endl;
+			cout << "Press A Button for firing ..." << endl;
+
+			while (level2){
+
+				//set up frame rate for the section, or CASE
+				thisTime = SDL_GetTicks();
+				deltaTime = (float) (thisTime - lastTime) / 1000;
+				lastTime = thisTime;
+
+				// check for input events
+				while (SDL_PollEvent(&e) != 0) {
+
+					//check to see if the SDL Window is closed - player clicks X in Window
+					if (e.type == SDL_QUIT) {
+						quit = true;
+						level2 = false;
+						break;
+
+					}
+					switch (e.type) {
+
+					case SDL_CONTROLLERBUTTONDOWN:
+
+						if (e.cdevice.which == 0) {
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
+
+								player.OnControllerButton(e.cbutton);
+								break;
+							}
+
+						}
+						break;
+
+					}
+				}
+
+				// Get x and Y values from game controller
+				const Sint16 Xvalue = SDL_GameControllerGetAxis(gGameControllerO,
+						SDL_CONTROLLER_AXIS_LEFTX);
+				const Sint16 Yvalue = SDL_GameControllerGetAxis(gGameControllerO,
+						SDL_CONTROLLER_AXIS_LEFTY);
+
+				// Pass values to method
+				player.OnControllerAxis(Xvalue, Yvalue);
+
+				// **** Update
+				// Update player
+				player.Update(deltaTime);
+
+				// **** Draw
+				//Clear the SDL RenderTarget
+				SDL_RenderClear(renderer);
+
+				// Draw the main menu
+				Level2.Draw(renderer);
+
+				// Player Draw
+				player.Draw(renderer);
+
+				// Present screen render
+				SDL_RenderPresent(renderer);
+			}
+			break; //end level2 case
+
+		// *********************************************************************************************************
+		case INSTRUCTIONS:
+			instructions = true;
+			cout << "The Game State is INSTRUCTIONS..." << endl;
+			cout << "Press A Button for MENU ..." << endl;
+			cout << "Press B Button for WIN ..." << endl;
+			cout << "Press X Button for LOSE ..." << endl;
+
+			while (instructions){
+
+
+				//set up frame rate for the section, or CASE
+				thisTime = SDL_GetTicks();
+				deltaTime = (float) (thisTime - lastTime) / 1000;
+				lastTime = thisTime;
+
+				// check for input events
+				while (SDL_PollEvent(&e) != 0) {
+
+					//check to see if the SDL Window is closed - player clicks X in Window
+					if (e.type == SDL_QUIT) {
+						quit = true;
+						instructions = false;
+						break;
+
+					}
+					switch (e.type) {
+
+					case SDL_CONTROLLERBUTTONDOWN:
+
+						if (e.cdevice.which == 0) {
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
+
+								instructions = false;
+								gameState = MENU;
+							}
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
+
+								instructions = false;
+								gameState = WIN;
+							}
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_X) {
+
+								instructions = false;
+								gameState = LOSE;
+							}
+						}
 						break;
 					}
 				}
-				break;
 
-			case SDL_CONTROLLERAXISMOTION:
+				// **** DRAW PROCESS ****
+				//Clear the SDL RenderTarget
+				SDL_RenderClear(renderer);
 
-				//tank1.OnControllerAxis(e.caxis);
-				break;
+				// Draw the main menu
+				Instructions.Draw(renderer);
+
+				// Present screen render
+				SDL_RenderPresent(renderer);
+
 
 			}
+			break; //end Instructions case
 
-		} // END POLL EVENT
+		// *********************************************************************************************************
+		case BACKSTORY:
+			backstory = true;
+			cout << "The Game State is Backstory..." << endl;
+			cout << "Press A Button for main menu ..." << endl;
 
-		// Get x and Y values from game controller
-		const Sint16 Xvalue = SDL_GameControllerGetAxis(gGameControllerO,
-				SDL_CONTROLLER_AXIS_LEFTX);
-		const Sint16 Yvalue = SDL_GameControllerGetAxis(gGameControllerO,
-				SDL_CONTROLLER_AXIS_LEFTY);
+			while (backstory){
 
-		// Pass values to method
-		player.OnControllerAxis(Xvalue, Yvalue);
+				//set up frame rate for the section, or CASE
+				thisTime = SDL_GetTicks();
+				deltaTime = (float) (thisTime - lastTime) / 1000;
+				lastTime = thisTime;
 
-		// **** UPDATE PROCESS ****
-		// Update player
-		player.Update(deltaTime);
+				// check for input events
+				while (SDL_PollEvent(&e) != 0) {
 
-		// **** DRAW PROCESS ****
-		//Clear the SDL RenderTarget
-		SDL_RenderClear(renderer);
+					//check to see if the SDL Window is closed - player clicks X in Window
+					if (e.type == SDL_QUIT) {
+						quit = true;
+						backstory = false;
+						break;
 
-		// Draw the main menu
-		SDL_RenderCopy(renderer, bkgd, NULL, &bkgdRect);
+					}
+					switch (e.type) {
 
-		// Player Draw
-		player.Draw(renderer);
+					case SDL_CONTROLLERBUTTONDOWN:
 
-		// Present screen render
-		SDL_RenderPresent(renderer);
+						if (e.cdevice.which == 0) {
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
 
-	}
+								backstory = false;
+								gameState = MENU;
+							}
+						}
+						break;
+					}
+				}
+
+				// **** DRAW PROCESS ****
+				//Clear the SDL RenderTarget
+				SDL_RenderClear(renderer);
+
+				// Draw the main menu
+				Backstory.Draw(renderer);
+
+				// Present screen render
+				SDL_RenderPresent(renderer);
+
+
+			}
+			break; //end back story case
+
+		// *********************************************************************************************************
+		case WIN:
+			win = true;
+			cout << "The Game State is WIN..." << endl;
+			cout << "Press A Button for main menu ..." << endl;
+
+			while (win){
+
+				//set up frame rate for the section, or CASE
+				thisTime = SDL_GetTicks();
+				deltaTime = (float) (thisTime - lastTime) / 1000;
+				lastTime = thisTime;
+
+				// check for input events
+				while (SDL_PollEvent(&e) != 0) {
+
+					//check to see if the SDL Window is closed - player clicks X in Window
+					if (e.type == SDL_QUIT) {
+						quit = true;
+						win = false;
+						break;
+
+					}
+					switch (e.type) {
+
+					case SDL_CONTROLLERBUTTONDOWN:
+
+						if (e.cdevice.which == 0) {
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
+
+								win = false;
+								gameState = MENU;
+							}
+						}
+						break;
+					}
+				}
+
+				// **** DRAW PROCESS ****
+				//Clear the SDL RenderTarget
+				SDL_RenderClear(renderer);
+
+				// Draw the main menu
+				Win.Draw(renderer);
+
+				// Present screen render
+				SDL_RenderPresent(renderer);
+			}
+			break; //end win case
+
+		// *********************************************************************************************************
+		case LOSE:
+			lose = true;
+			cout << "The Game State is LOSE..." << endl;
+			cout << "Press A Button for main menu ..." << endl;
+
+			while (lose){
+
+				//set up frame rate for the section, or CASE
+				thisTime = SDL_GetTicks();
+				deltaTime = (float) (thisTime - lastTime) / 1000;
+				lastTime = thisTime;
+
+				// check for input events
+				while (SDL_PollEvent(&e) != 0) {
+
+					//check to see if the SDL Window is closed - player clicks X in Window
+					if (e.type == SDL_QUIT) {
+						quit = true;
+						lose = false;
+						break;
+
+					}
+					switch (e.type) {
+
+					case SDL_CONTROLLERBUTTONDOWN:
+
+						if (e.cdevice.which == 0) {
+							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
+
+								lose = false;
+								gameState = MENU;
+							}
+						}
+						break;
+					}
+				}
+
+				// **** DRAW PROCESS ****
+				//Clear the SDL RenderTarget
+				SDL_RenderClear(renderer);
+
+				// Draw the main menu
+				Lose.Draw(renderer);
+
+				// Present screen render
+				SDL_RenderPresent(renderer);
+			}
+			break; //end lose case
+
+		}//end gamestate
+	}//end while !quit loop
 
 	// Close and Destroy Window
 	SDL_DestroyWindow(window);
