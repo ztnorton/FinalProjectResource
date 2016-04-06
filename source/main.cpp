@@ -8,6 +8,7 @@
 #include <time.h>
 #include "player.h"
 #include "menu.h"
+#include "button.h"
 
 
 using namespace std;
@@ -16,6 +17,98 @@ using namespace std;
 float deltaTime = 0.0;
 int thisTime = 0;
 int lastTime = 0;
+
+
+//**** Joystick
+
+//Analog joy stick dead zone
+const int JOYSTICK_DEAD_ZONE = 8000;
+
+// joy stick directions variables
+float xDir, yDir;
+
+// cursor float vars for movement
+float pos_X, pos_Y;
+
+// Create SDL Rectangle for the 2 player graphic
+SDL_Rect cursorPos, activePos;
+
+// Variable for cursor speed
+int cursorSpeed = 400;
+
+void moveCursor(const SDL_ControllerAxisEvent event) {
+	//check Joystick 0 - first player
+	if (event.which == 0) {
+
+		//check X Axis
+		if (event.axis == 0) {
+
+			if (event.value < -JOYSTICK_DEAD_ZONE) {
+				xDir = -1.0f;
+			}
+			else if (event.value > JOYSTICK_DEAD_ZONE) {
+				xDir = 1.0f;
+			}
+			else {
+				xDir = 0.0f;
+			}
+		}
+
+		//check Y Axis
+		if (event.axis == 1) {
+
+			if (event.value < -JOYSTICK_DEAD_ZONE) {
+				yDir = -1.0f;
+			}
+			else if (event.value > JOYSTICK_DEAD_ZONE) {
+				yDir = 1.0f;
+			}
+			else {
+				yDir = 0.0f;
+			}
+		}
+	}
+}
+
+void UpdateCursor(float deltaTime) {
+
+	//Update Cursor
+	pos_X += (cursorSpeed * xDir) * deltaTime;
+	pos_Y += (cursorSpeed * yDir) * deltaTime;
+
+	//assign to SDL_Rect ints X and Y
+	cursorPos.x = (int)(pos_X + 0.5f);
+	cursorPos.y = (int)(pos_Y + 0.5f);
+
+	//update active position of cursor - collision box
+	activePos.x = cursorPos.x;
+	activePos.y = cursorPos.y;
+
+	// off the screen in X
+	if (cursorPos.x < 0) {
+		cursorPos.x = 0;
+		pos_X = cursorPos.x;
+	}
+	if (cursorPos.x > 1024 - cursorPos.w) {
+		cursorPos.x = 1024 - cursorPos.w;
+		pos_X = cursorPos.x;
+	}
+
+	// off the screen in Y
+	if (cursorPos.y < 0) {
+		cursorPos.y = 0;
+		pos_Y = cursorPos.y;
+	}
+	if (cursorPos.y > 768 - cursorPos.h) {
+		cursorPos.y = 768 - cursorPos.h;
+		pos_Y = cursorPos.y;
+	}
+}
+
+// variables for all Menu button over
+bool startGameOver = false, backstoryOver = false, instructionsOver = false,
+		quitOver = false, menuOver = false, playAgainOver = false, continueOver = false;
+
 
 #if defined(__APPLE__)
 #include <SDL2/SDL.h>
@@ -65,7 +158,7 @@ string audio_dir = currentWorkingDirectory + "/FinalProjectResource/audio/";
 // ******** MAIN START **********
 int main(int argc, char* argv[]) {
 
-	// **** Creat SDL Window - START ****
+	// **** Create SDL Window - START ****
 	// Start SDL2
 	SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -81,8 +174,7 @@ int main(int argc, char* argv[]) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	// **** Create SDL Window - END ****
 
-
-	// **** Variable Creation - START ****
+	// **** Variable Creation
 
 	// Event Handler
 	SDL_Event e;
@@ -102,16 +194,16 @@ int main(int argc, char* argv[]) {
 	// **** Create Players - START ****
 	Player player = Player(renderer, images_dir.c_str(), audio_dir.c_str(), 950.0f, 384.0f);
 
-	// **** MainMenu Textures - START ****
+	// **** Main Menu Textures
 	Menu MainMenu = Menu(renderer, images_dir.c_str(), "mainMenu.png", 0.0f, 0.0f);
 	Menu Level1 = Menu(renderer, images_dir.c_str(), "level1.png", 0.0f, 0.0f);
 	Menu Level2 = Menu(renderer, images_dir.c_str(), "level2.png", 0.0f, 0.0f);
-	Menu Instructions = Menu(renderer, images_dir.c_str(), "instructions.png", 0.0f, 0.0f);
-	Menu Backstory = Menu(renderer, images_dir.c_str(), "backstory.png", 0.0f, 0.0f);
-	Menu Win = Menu(renderer, images_dir.c_str(), "win.png", 0.0f, 0.0f);
-	Menu Lose = Menu(renderer, images_dir.c_str(), "win.png", 0.0f, 0.0f);
+	Menu Instructions = Menu(renderer, images_dir.c_str(), "instBackstory.png", 0.0f, 0.0f);
+	Menu Backstory = Menu(renderer, images_dir.c_str(), "instBackstory.png", 0.0f, 0.0f);
+	Menu Win = Menu(renderer, images_dir.c_str(), "winLose.png", 0.0f, 0.0f);
+	Menu Lose = Menu(renderer, images_dir.c_str(), "winLose.png", 0.0f, 0.0f);
 
-	// **** Set Up Game State Enums
+	// **** Set Up Game State Enumerators
 	enum GameState {
 		MENU, INSTRUCTIONS, BACKSTORY, LEVEL1, LEVEL2, WIN, LOSE
 	};
@@ -122,6 +214,38 @@ int main(int argc, char* argv[]) {
 	bool menu= false; bool instructions= false; bool backstory= false; bool level1= false; bool level2= false; bool win= false; bool lose= false; bool quit = false;
 
 
+	//**** Create Cursor
+	// create a SDL texture - cursor
+	SDL_Texture *cursor;
+
+	//create the SDL surface to hold texture file
+	cursor = IMG_LoadTexture(renderer, (images_dir + "cursor.png").c_str());
+
+	// create the SDL_Rectangle for the texture's position and size - x,y,w,h
+	//SDL_Rect cursorPos, activePos;
+	cursorPos.x = 0;
+	cursorPos.y = 0;
+
+	int w, h;
+	SDL_QueryTexture(cursor, NULL, NULL, &w, &h);
+	cursorPos.w = w;
+	cursorPos.h = h;
+
+	// set the X, Y, W, and H for the Rectangle - cursor collision
+	activePos.x = 5;
+	activePos.y = 5;
+	activePos.w = 5;
+	activePos.h = 5;
+
+	// **** Create Buttons and selection
+	Button selected (renderer, images_dir.c_str(), "selected.png", 750.0f, 500.0f);
+	Button startN (renderer, images_dir.c_str(), "startN.png", 386.0f, 419.0f);
+	Button instructionsN (renderer, images_dir.c_str(), "instructionsN.png", 386.0f, 478.0f);
+	Button backstoryN (renderer, images_dir.c_str(), "backstoryN.png", 386.0f, 537.0f);
+	Button quitN (renderer, images_dir.c_str(), "quitN.png", 386.0f, 598.0f);
+	Button playAgainN (renderer, images_dir.c_str(), "playN.png", 750.0f, 500.0f);
+	Button continueN (renderer, images_dir.c_str(), "continueN.png", 750.0f, 500.0f);
+	Button mainN (renderer, images_dir.c_str(), "mainN.png", 750.0f, 500.0f);
 
 	// **** MAIN LOOP GAME START ****
 
@@ -132,9 +256,6 @@ int main(int argc, char* argv[]) {
 		case MENU:
 			menu = true;
 			cout << "The Game State is Menu..." << endl;
-			cout << "Press A Button for level 1..." << endl;
-			cout << "Press B Button for Instructions..." << endl;
-			cout << "Press X Button for BackStory..." << endl;
 
 			while (menu) {
 
@@ -160,25 +281,48 @@ int main(int argc, char* argv[]) {
 						if (e.cdevice.which == 0) {
 							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
 
-								menu = false;
-								gameState = LEVEL1;
-							}
-							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
-
-								menu = false;
-								gameState = INSTRUCTIONS;
-							}
-							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_X) {
-
-								menu = false;
-								gameState = BACKSTORY;
+								if (startGameOver) {
+									menu = false;
+									gameState = LEVEL1;
+									startGameOver = false;
+								}
+								// if player chooses 2 player game
+								if (backstoryOver) {
+									menu = false;
+									gameState = BACKSTORY;
+									backstoryOver = false;
+								}
+								// if player chooses Instructions
+								if (instructionsOver) {
+									menu = false;
+									gameState = INSTRUCTIONS;
+									instructionsOver = false;
+								}
+								// if player chooses Instructions
+								if (quitOver) {
+									menu = false;
+									quit = true;
+									quitOver = false;
+								}
 							}
 						}
 						break;
 
+					case SDL_CONTROLLERAXISMOTION:
+						moveCursor(e.caxis);
+						break;
 					}
 
 				} // END POLL EVENT
+
+				// **** UPDATE
+				UpdateCursor(deltaTime);
+
+				// check for collision between cursor active state and buttons
+				startGameOver = SDL_HasIntersection(&activePos, &startN.posRect);
+				backstoryOver = SDL_HasIntersection(&activePos, &backstoryN.posRect);
+				instructionsOver = SDL_HasIntersection(&activePos, &instructionsN.posRect);
+				quitOver = SDL_HasIntersection(&activePos, &quitN.posRect);
 
 				// **** DRAW PROCESS ****
 				//Clear the SDL RenderTarget
@@ -187,12 +331,40 @@ int main(int argc, char* argv[]) {
 				// Draw the main menu
 				MainMenu.Draw(renderer);
 
+				if(startGameOver){
+					startN.Draw(renderer, startN.posRect);
+					selected.Draw(renderer, startN.posRect);
+				}else{
+					startN.Draw(renderer, startN.posRect);
+				}
+				if(backstoryOver){
+					backstoryN.Draw(renderer, backstoryN.posRect);
+					selected.Draw(renderer, backstoryN.posRect);
+				}else{
+					backstoryN.Draw(renderer, backstoryN.posRect);
+				}
+				if(instructionsOver){
+					instructionsN.Draw(renderer, instructionsN.posRect);
+					selected.Draw(renderer, instructionsN.posRect);
+				}else{
+					instructionsN.Draw(renderer, instructionsN.posRect);
+				}
+				if(quitOver){
+					quitN.Draw(renderer, quitN.posRect);
+					selected.Draw(renderer, quitN.posRect);
+				}else{
+					quitN.Draw(renderer, quitN.posRect);
+				}
+
+				//Draw Cursor
+				SDL_RenderCopy(renderer, cursor, NULL, &cursorPos);
+
 				// Present screen render
 				SDL_RenderPresent(renderer);
 			}
 			break; //end main menu case
 
-		// *********************************************************************************************************
+			// *********************************************************************************************************
 		case LEVEL1:
 			level1 = true;
 			cout << "The Game State is LEVEL 1..." << endl;
@@ -267,7 +439,7 @@ int main(int argc, char* argv[]) {
 			}
 			break; //end level1 case
 
-		// *********************************************************************************************************
+			// *********************************************************************************************************
 		case LEVEL2:
 			level2 = true;
 			cout << "The Game State is LEVEL 2..." << endl;
@@ -335,7 +507,7 @@ int main(int argc, char* argv[]) {
 			}
 			break; //end level2 case
 
-		// *********************************************************************************************************
+			// *********************************************************************************************************
 		case INSTRUCTIONS:
 			instructions = true;
 			cout << "The Game State is INSTRUCTIONS..." << endl;
@@ -400,7 +572,7 @@ int main(int argc, char* argv[]) {
 			}
 			break; //end Instructions case
 
-		// *********************************************************************************************************
+			// *********************************************************************************************************
 		case BACKSTORY:
 			backstory = true;
 			cout << "The Game State is Backstory..." << endl;
@@ -452,7 +624,7 @@ int main(int argc, char* argv[]) {
 			}
 			break; //end back story case
 
-		// *********************************************************************************************************
+			// *********************************************************************************************************
 		case WIN:
 			win = true;
 			cout << "The Game State is WIN..." << endl;
@@ -502,7 +674,7 @@ int main(int argc, char* argv[]) {
 			}
 			break; //end win case
 
-		// *********************************************************************************************************
+			// *********************************************************************************************************
 		case LOSE:
 			lose = true;
 			cout << "The Game State is LOSE..." << endl;
