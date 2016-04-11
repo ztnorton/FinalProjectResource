@@ -9,7 +9,7 @@
 #include "player.h"
 #include "menu.h"
 #include "button.h"
-
+#include "fire.h"
 
 using namespace std;
 
@@ -191,6 +191,11 @@ int main(int argc, char* argv[]) {
 	// **** Open Audio Channel ****
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 
+	// **** Make Fires
+	Fire fire1 = Fire(renderer, images_dir, 0, 0);
+
+
+
 	// **** Create Players - START ****
 	Player player = Player(renderer, images_dir.c_str(), audio_dir.c_str(), 950.0f, 384.0f);
 
@@ -217,7 +222,6 @@ int main(int argc, char* argv[]) {
 
 
 	//**** Create Cursor
-	// create a SDL texture - cursor
 	SDL_Texture *cursor;
 
 	//create the SDL surface to hold texture file
@@ -252,6 +256,7 @@ int main(int argc, char* argv[]) {
 
 	Button playAgainN (renderer, images_dir.c_str(), "playN.png", 750.0f, 55.0f);
 	Button continueN (renderer, images_dir.c_str(), "continueN.png", 750.0f, 55.0f);
+
 
 	// **** MAIN LOOP GAME START ****
 
@@ -343,7 +348,10 @@ int main(int argc, char* argv[]) {
 				} // END POLL EVENT
 
 				// **** UPDATE
+				fire1.Update(deltaTime);
+
 				UpdateCursor(deltaTime);
+
 
 				// check for collision between cursor active state and buttons
 				startGameOver = SDL_HasIntersection(&activePos, &startN.posRect);
@@ -357,6 +365,9 @@ int main(int argc, char* argv[]) {
 
 				// Draw the main menu
 				MainMenu.Draw(renderer);
+
+
+				fire1.Draw(renderer);
 
 				if(startGameOver){
 					startN.Draw(renderer, startN.posRect);
@@ -383,8 +394,10 @@ int main(int argc, char* argv[]) {
 					quitN.Draw(renderer, quitN.posRect);
 				}
 
+
 				//Draw Cursor
 				SDL_RenderCopy(renderer, cursor, NULL, &cursorPos);
+
 
 				// Present screen render
 				SDL_RenderPresent(renderer);
