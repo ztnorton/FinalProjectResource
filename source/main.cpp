@@ -140,7 +140,6 @@ string images_dir = currentWorkingDirectory + "\\FinalProjectResource\\image\\";
 string audio_dir = currentWorkingDirectory + "\\FinalProjectResource\\audio\\";
 #endif
 
-
 #if defined(__linux__)
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
@@ -192,8 +191,9 @@ int main(int argc, char* argv[]) {
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 
 	// **** Make Fires
-	Fire fire1 = Fire(renderer, images_dir, 0, 0);
-
+	Fire fire1 = Fire(renderer, images_dir, 1, -40, 200);
+	Fire fire2 = Fire(renderer, images_dir, 1, 620, 200);
+	Fire fireBig = Fire(renderer, images_dir, 0, 700, 180);
 
 
 	// **** Create Players - START ****
@@ -201,10 +201,12 @@ int main(int argc, char* argv[]) {
 
 	// **** Main Menu Textures
 	Menu MainMenu = Menu(renderer, images_dir.c_str(), "mainMenu.png", 0.0f, 0.0f);
+	Menu Barrels = Menu(renderer, images_dir.c_str(), "barrels.png", 0.0f, 0.0f);
 	Menu Level1 = Menu(renderer, images_dir.c_str(), "level1.png", 0.0f, 0.0f);
 	Menu Level2 = Menu(renderer, images_dir.c_str(), "level2.png", 0.0f, 0.0f);
 	Menu Instructions = Menu(renderer, images_dir.c_str(), "instBackstory.png", 0.0f, 0.0f);
 	Menu Backstory = Menu(renderer, images_dir.c_str(), "instBackstory.png", 0.0f, 0.0f);
+	Menu BarrelBackInst = Menu(renderer, images_dir.c_str(), "barrelBackInst.png", 0.0f, 0.0f);
 	Menu Win = Menu(renderer, images_dir.c_str(), "winLose.png", 0.0f, 0.0f);
 	Menu Lose = Menu(renderer, images_dir.c_str(), "winLose.png", 0.0f, 0.0f);
 
@@ -349,9 +351,9 @@ int main(int argc, char* argv[]) {
 
 				// **** UPDATE
 				fire1.Update(deltaTime);
+				fire2.Update(deltaTime);
 
 				UpdateCursor(deltaTime);
-
 
 				// check for collision between cursor active state and buttons
 				startGameOver = SDL_HasIntersection(&activePos, &startN.posRect);
@@ -366,8 +368,10 @@ int main(int argc, char* argv[]) {
 				// Draw the main menu
 				MainMenu.Draw(renderer);
 
-
 				fire1.Draw(renderer);
+				fire2.Draw(renderer);
+
+				Barrels.Draw(renderer);
 
 				if(startGameOver){
 					startN.Draw(renderer, startN.posRect);
@@ -633,6 +637,8 @@ int main(int argc, char* argv[]) {
 				// **** UPDATE
 				UpdateCursor(deltaTime);
 
+				fireBig.Update(deltaTime);
+
 				// check for collision between cursor active state and buttons
 				startGameOver = SDL_HasIntersection(&activePos, &startN.posRect);
 				backstoryOver = SDL_HasIntersection(&activePos, &backstoryN.posRect);
@@ -644,6 +650,10 @@ int main(int argc, char* argv[]) {
 
 				// Draw the main menu
 				Instructions.Draw(renderer);
+
+				fireBig.Draw(renderer);
+
+				BarrelBackInst.Draw(renderer);
 
 				if(startGameOver){
 					startN.Draw(renderer, startN.posRect);
@@ -741,6 +751,8 @@ int main(int argc, char* argv[]) {
 				// **** UPDATE
 				UpdateCursor(deltaTime);
 
+				fireBig.Update(deltaTime);
+
 				// check for collision between cursor active state and buttons
 				startGameOver = SDL_HasIntersection(&activePos, &startN.posRect);
 				instructionsOver = SDL_HasIntersection(&activePos, &instructionsN.posRect);
@@ -752,6 +764,10 @@ int main(int argc, char* argv[]) {
 
 				// Draw the main menu
 				Backstory.Draw(renderer);
+
+				fireBig.Draw(renderer);
+
+				BarrelBackInst.Draw(renderer);
 
 				if(startGameOver){
 					startN.Draw(renderer, startN.posRect);

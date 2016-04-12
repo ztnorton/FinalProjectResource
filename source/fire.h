@@ -35,7 +35,7 @@ public:
 	// Float values to track time until next frame of animation
 	float frameCounter;
 
-	Fire(SDL_Renderer *renderer, string filePath, float x, float y);
+	Fire(SDL_Renderer *renderer, string filePath, int i, float x, float y);
 
 	void Update(float deltaTime);
 
