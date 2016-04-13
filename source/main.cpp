@@ -6,12 +6,17 @@
 #include <vector>
 #include <stdint.h>
 #include <time.h>
+#include <stdlib.h>
+
 #include "player.h"
 #include "menu.h"
 #include "button.h"
 #include "fire.h"
+#include "zombie.h"
 
 using namespace std;
+
+vector<Zombie> zombieList;
 
 // DeltaTime var initialization - FPS independence
 float deltaTime = 0.0;
@@ -198,6 +203,7 @@ int main(int argc, char* argv[]) {
 
 	// **** Create Players - START ****
 	Player player = Player(renderer, images_dir.c_str(), audio_dir.c_str(), 950.0f, 384.0f);
+
 
 	// **** Main Menu Textures
 	Menu MainMenu = Menu(renderer, images_dir.c_str(), "mainMenu.png", 0.0f, 0.0f);
@@ -411,6 +417,22 @@ int main(int argc, char* argv[]) {
 			// *********************************************************************************************************
 		case LEVEL1:
 			level1 = true;
+
+			zombieList.clear();
+
+			//create zombies
+			for (int i = 0; i < 8; i++){
+
+				int kX = (rand() % 1024);
+				int kY = (rand() % 768);
+
+				// Create Enemy
+				Zombie zombiE (renderer, images_dir, audio_dir, kX, kY);
+
+				//add to Zlist
+				zombieList.push_back(zombiE);
+			}
+
 			cout << "The Game State is LEVEL 1..." << endl;
 			cout << "Press A Button for firing ..." << endl;
 			cout << "Press X Button for LEVEL 2 ..." << endl;
@@ -478,6 +500,11 @@ int main(int argc, char* argv[]) {
 				// Update player
 				player.Update(deltaTime);
 
+				//Update Zombies
+				for (int i = 0; i < zombieList.size(); i++){
+					zombieList[i].Update(deltaTime, player.posRect);
+				}
+
 				// **** Draw
 
 				//Clear the SDL RenderTarget
@@ -489,6 +516,10 @@ int main(int argc, char* argv[]) {
 				// Player Draw
 				player.Draw(renderer);
 
+				for (int i = 0; i < zombieList.size(); i++){
+					zombieList[i].Draw(renderer);
+				}
+
 				// Present screen render
 				SDL_RenderPresent(renderer);
 			}
@@ -497,6 +528,22 @@ int main(int argc, char* argv[]) {
 			// *********************************************************************************************************
 		case LEVEL2:
 			level2 = true;
+
+			zombieList.clear();
+
+			//create zombies
+			for (int i = 0; i < 4; i++){
+
+				int kX = (rand() % 1024);
+				int kY = (rand() % 768);
+
+				// Create Enemy
+				Zombie zombiE (renderer, images_dir, audio_dir, kX, kY);
+
+				//add to Zlist
+				zombieList.push_back(zombiE);
+			}
+
 			cout << "The Game State is LEVEL 2..." << endl;
 			cout << "Press A Button for firing ..." << endl;
 
@@ -556,6 +603,10 @@ int main(int argc, char* argv[]) {
 				// Update player
 				player.Update(deltaTime);
 
+				for (int i = 0; i < zombieList.size(); i++){
+					zombieList[i].Update(deltaTime, player.posRect);
+				}
+
 				// **** Draw
 				//Clear the SDL RenderTarget
 				SDL_RenderClear(renderer);
@@ -565,6 +616,10 @@ int main(int argc, char* argv[]) {
 
 				// Player Draw
 				player.Draw(renderer);
+
+				for (int i = 0; i < zombieList.size(); i++){
+					zombieList[i].Draw(renderer);
+				}
 
 				// Present screen render
 				SDL_RenderPresent(renderer);

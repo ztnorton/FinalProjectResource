@@ -1,7 +1,7 @@
 #include "player.h"
 
 
-// Analog joystick dead zone
+// Analog joy stick dead zone
 const int JOYSTICK_DEAD_ZONE = 8000;
 
 Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float x, float y){
@@ -9,6 +9,8 @@ Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	active = true;
 
 	speed = 200.0f;
+
+	xangle = 0; yangle = 0; playerangle = 0; oldAngle = 0; Xvalue = 0; Yvalue = 0;
 
 	fire = Mix_LoadWAV((audioPath + "fire.wav").c_str());
 
@@ -44,7 +46,7 @@ Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float 
 
 	// Create Bullet Pool
 	for (int i = 0; i < 10; i++) {
-		PlayerBullet tmpBullet(renderer, bulletPath, -5000, -5000, 0, 0);
+		PlayerBullet tmpBullet(renderer, bulletPath, -1000, -1000, 0, 0);
 		bulletList.push_back(tmpBullet);
 	}
 
@@ -52,7 +54,7 @@ Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float 
 
 void Player::Update(float deltaTime){
 
-	// Check for gamepad input
+	// Check for game pad input
 	if (Xvalue != 0 || Yvalue != 0) {
 		// Get the angle between the tank and turret
 		playerangle = atan2(Yvalue, Xvalue) * 180 / 3.14;

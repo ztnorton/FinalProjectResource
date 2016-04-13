@@ -66,7 +66,7 @@ public:
 	float pos_X, pos_Y;
 
 	// Vars used to get angle between the player's position and joystick position
-	float x, y, playerangle;
+	float xangle, yangle, playerangle;
 
 	// Point that will be used to rotate turret - relative to the player barrel's RECT
 	SDL_Point center;
