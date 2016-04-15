@@ -13,6 +13,7 @@
 #include "button.h"
 #include "fire.h"
 #include "zombie.h"
+#include "turret.h"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ int thisTime = 0;
 int lastTime = 0;
 
 
-//**** Joystick
+//**** Joy stick / Cursor
 
 //Analog joy stick dead zone
 const int JOYSTICK_DEAD_ZONE = 8000;
@@ -111,8 +112,7 @@ void UpdateCursor(float deltaTime) {
 }
 
 // variables for all Menu button over
-bool startGameOver = false, backstoryOver = false, instructionsOver = false,
-		quitOver = false, menuOver = false, playAgainOver = false, continueOver = false;
+bool startGameOver = false, backstoryOver = false, instructionsOver = false, quitOver = false, menuOver = false, playAgainOver = false, continueOver = false;
 
 
 #if defined(__APPLE__)
@@ -201,8 +201,14 @@ int main(int argc, char* argv[]) {
 	Fire fireBig = Fire(renderer, images_dir, 0, 700, 180);
 
 
-	// **** Create Players - START ****
+	// **** Create Players
 	Player player = Player(renderer, images_dir.c_str(), audio_dir.c_str(), 950.0f, 384.0f);
+
+	// **** Create Turrets
+	Turret turret1(renderer, images_dir, audio_dir, 75.0f, 50.0f);
+	Turret turret2(renderer, images_dir, audio_dir, 725.0f, 50.0f);
+	Turret turret3(renderer, images_dir, audio_dir, 725.0f, 580.0f);
+	Turret turret4(renderer, images_dir, audio_dir, 75.0f, 580.0f);
 
 
 	// **** Main Menu Textures
@@ -271,6 +277,8 @@ int main(int argc, char* argv[]) {
 	while (!quit) {
 
 		switch (gameState) {
+		// *********************************************************************************************************
+		// *********************************************************************************************************
 		// *********************************************************************************************************
 		case MENU:
 			menu = true;
@@ -405,6 +413,7 @@ int main(int argc, char* argv[]) {
 				}
 
 
+
 				//Draw Cursor
 				SDL_RenderCopy(renderer, cursor, NULL, &cursorPos);
 
@@ -414,6 +423,8 @@ int main(int argc, char* argv[]) {
 			}
 			break; //end main menu case
 
+			// *********************************************************************************************************
+			// *********************************************************************************************************
 			// *********************************************************************************************************
 		case LEVEL1:
 			level1 = true;
@@ -526,13 +537,15 @@ int main(int argc, char* argv[]) {
 			break; //end level1 case
 
 			// *********************************************************************************************************
+			// *********************************************************************************************************
+			// *********************************************************************************************************
 		case LEVEL2:
 			level2 = true;
 
 			zombieList.clear();
 
 			//create zombies
-			for (int i = 0; i < 4; i++){
+			for (int i = 0; i < 3; i++){
 
 				int kX = (rand() % 1024);
 				int kY = (rand() % 768);
@@ -603,6 +616,12 @@ int main(int argc, char* argv[]) {
 				// Update player
 				player.Update(deltaTime);
 
+				//Update Turrets
+				turret1.Update(deltaTime, player.posRect);
+				turret2.Update(deltaTime, player.posRect);
+				turret3.Update(deltaTime, player.posRect);
+				turret4.Update(deltaTime, player.posRect);
+
 				for (int i = 0; i < zombieList.size(); i++){
 					zombieList[i].Update(deltaTime, player.posRect);
 				}
@@ -621,12 +640,20 @@ int main(int argc, char* argv[]) {
 					zombieList[i].Draw(renderer);
 				}
 
+				turret1.Draw(renderer);
+				turret2.Draw(renderer);
+				turret3.Draw(renderer);
+				turret4.Draw(renderer);
+
 				// Present screen render
 				SDL_RenderPresent(renderer);
 			}
 			break; //end level2 case
 
 			// *********************************************************************************************************
+			// *********************************************************************************************************
+			// *********************************************************************************************************
+
 		case INSTRUCTIONS:
 			instructions = true;
 
@@ -740,6 +767,9 @@ int main(int argc, char* argv[]) {
 			break; //end Instructions case
 
 			// *********************************************************************************************************
+			// *********************************************************************************************************
+			// *********************************************************************************************************
+
 		case BACKSTORY:
 			backstory = true;
 
@@ -750,7 +780,6 @@ int main(int argc, char* argv[]) {
 			startN.posRect.y = 100.0f;
 
 			cout << "The Game State is Backstory..." << endl;
-			cout << "Press A Button for main menu ..." << endl;
 
 			while (backstory){
 
@@ -854,11 +883,13 @@ int main(int argc, char* argv[]) {
 			break; //end back story case
 
 			// *********************************************************************************************************
+			// *********************************************************************************************************
+			// *********************************************************************************************************
+
 		case WIN:
 			win = true;
 
 			cout << "The Game State is WIN..." << endl;
-			cout << "Press A Button for main menu ..." << endl;
 
 			while (win){
 
@@ -941,10 +972,12 @@ int main(int argc, char* argv[]) {
 			break; //end win case
 
 			// *********************************************************************************************************
+			// *********************************************************************************************************
+			// *********************************************************************************************************
+
 		case LOSE:
 			lose = true;
 			cout << "The Game State is LOSE..." << endl;
-			cout << "Press A Button for main menu ..." << endl;
 
 			while (lose){
 
