@@ -32,16 +32,18 @@ class Player {
 public:
 
 	// Textures for health bar
-	//SDL_Texture *back, *mid, *front;
+	SDL_Texture *back, *mid, *front;
 
 	// Player's SDL_Rect for the X,Y,W, and H for Texture
-	//SDL_Rect backR, midR, frontR;
+	SDL_Rect backR, midR, frontR;
 
 	// Player health
-	//float playerHealth, maxHealth;
+	float playerHealth, maxHealth;
 
 	// Is the player active - still alive?
 	bool active;
+
+	bool key1, key2, gen1, gen2, gen3, gen4;
 
 	// Var to hold the list of bullets
 	vector<PlayerBullet> bulletList;
@@ -103,6 +105,8 @@ public:
 
 	// Player hit by Guard Tower bullet
 	void eBulletHit();
+
+	void GiveHealth();
 
 private:
 

@@ -58,10 +58,14 @@ void PlayerBullet::Draw(SDL_Renderer *renderer){
 
 void PlayerBullet::Reset(){
 
-	posRect.x = -1000;
-
-	pos_X = posRect.x;
 
 	active = false;
+
+	posRect.x = -550;
+
+	posRect.y = -550;
+
+	pos_X = posRect.x;
+	pos_Y = posRect.y;
 
 }

@@ -14,6 +14,7 @@
 #include "fire.h"
 #include "zombie.h"
 #include "turret.h"
+#include "item.h"
 
 using namespace std;
 
@@ -259,17 +260,18 @@ int main(int argc, char* argv[]) {
 
 	// **** Create Buttons and selection
 	Button selected (renderer, images_dir.c_str(), "selected.png", 750.0f, 500.0f);
-
 	Button startN (renderer, images_dir.c_str(), "startN.png", 386.0f, 419.0f);
 	Button instructionsN (renderer, images_dir.c_str(), "instructionsN.png", 386.0f, 478.0f);
 	Button backstoryN (renderer, images_dir.c_str(), "backstoryN.png", 386.0f, 537.0f);
-
 	Button quitN (renderer, images_dir.c_str(), "quitN.png", 386.0f, 598.0f);
-
 	Button mainN (renderer, images_dir.c_str(), "mainN.png", 750.0f, 15.0f);
-
 	Button playAgainN (renderer, images_dir.c_str(), "playN.png", 750.0f, 55.0f);
 	Button continueN (renderer, images_dir.c_str(), "continueN.png", 750.0f, 55.0f);
+
+	// **** Create ITEMS
+	Item key1 (renderer, images_dir.c_str(), 0 , -100, -100);
+	Item key2 (renderer, images_dir.c_str(), 0 , -100, -100);
+
 
 
 	// **** MAIN LOOP GAME START ****
@@ -516,6 +518,71 @@ int main(int argc, char* argv[]) {
 					zombieList[i].Update(deltaTime, player.posRect);
 				}
 
+				// **** COLLISIONS
+
+				// **** Check for player shoots Zombies
+				for (int i = 0; i < player.bulletList.size(); i++) {
+					if(player.bulletList[i].active == true){
+						for (int j = 0; j < zombieList.size(); j++){
+							if (SDL_HasIntersection(&player.bulletList[i].posRect, &zombieList[j].zombieRect)){
+
+
+								player.bulletList[j].Reset();
+								zombieList[j].RemoveHealth();
+
+								int dropRate = (rand() % 2);
+
+								if (dropRate == 1){
+
+									if (player.key1 == false && player.key2 == false){
+										key1.Drop(zombieList[j].zombieRect.x, zombieList[j].zombieRect.y);
+										cout << "KEY 1 Drop" << endl;
+									}
+
+									if ( player.key1 == true && player.key2 == false){
+										key2.Drop(zombieList[j].zombieRect.x, zombieList[j].zombieRect.y);
+										cout << "KEY 2 Drop" << endl;
+
+									}
+
+									break;
+								}
+							}
+						}
+					}
+				}
+				//Check for hit by zombies
+				for (int j = 0; j < zombieList.size(); j++){
+					if (SDL_HasIntersection(&player.posRect, &zombieList[j].zombieRect)){
+
+						// Play hit sound
+						//	Mix_PlayChannel(-1, explosionSound, 0);
+
+						player.eZombieHit();
+
+						if (player.playerHealth <= 0){
+
+							player.Reset();
+							level1 = false;
+							gameState = LOSE;
+							break;
+						}
+					}
+				}
+
+
+				//check for item collision
+				if (SDL_HasIntersection(&player.posRect, &key1.posRect)){
+					key1.Reset();
+					player.key1 = true;
+				}
+				if (SDL_HasIntersection(&player.posRect, &key2.posRect)){
+					key2.Reset();
+					player.key2 = true;
+				}
+
+
+
 				// **** Draw
 
 				//Clear the SDL RenderTarget
@@ -523,6 +590,10 @@ int main(int argc, char* argv[]) {
 
 				// Draw the main menu
 				Level1.Draw(renderer);
+
+				key1.Draw(renderer);
+
+				key2.Draw(renderer);
 
 				// Player Draw
 				player.Draw(renderer);
@@ -556,6 +627,7 @@ int main(int argc, char* argv[]) {
 				//add to Zlist
 				zombieList.push_back(zombiE);
 			}
+
 
 			cout << "The Game State is LEVEL 2..." << endl;
 			cout << "Press A Button for firing ..." << endl;
@@ -624,6 +696,40 @@ int main(int argc, char* argv[]) {
 
 				for (int i = 0; i < zombieList.size(); i++){
 					zombieList[i].Update(deltaTime, player.posRect);
+				}
+
+				// **** COLLISION
+
+				// **** Check for player shoots Zombies
+				for (int i = 0; i < player.bulletList.size(); i++) {
+					if(player.bulletList[i].active == true){
+						for (int j = 0; j < zombieList.size(); j++){
+							if (SDL_HasIntersection(&player.bulletList[i].posRect, &zombieList[j].zombieRect)){
+								player.bulletList[j].Reset();
+								zombieList[j].RemoveHealth();
+								break;
+							}
+						}
+					}
+				}
+
+				// **** check for zombies hitting player
+				for (int j = 0; j < zombieList.size(); j++){
+					if (SDL_HasIntersection(&player.posRect, &zombieList[j].zombieRect)){
+
+						// Play hit sound
+						//	Mix_PlayChannel(-1, explosionSound, 0);
+
+						player.eZombieHit();
+
+						if (player.playerHealth <= 0){
+
+							player.Reset();
+							level1 = false;
+							gameState = LOSE;
+							break;
+						}
+					}
 				}
 
 				// **** Draw

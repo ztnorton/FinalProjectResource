@@ -6,6 +6,21 @@ const int JOYSTICK_DEAD_ZONE = 8000;
 
 Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float x, float y){
 
+	back = IMG_LoadTexture(renderer, (filePath + "HPback.png").c_str());
+	mid = IMG_LoadTexture(renderer, (filePath + "HPmid.png").c_str());
+	front = IMG_LoadTexture(renderer, (filePath + "HPfront.png").c_str());
+
+	backR.x = midR.x = frontR.x = 10;
+	backR.y = midR.y = frontR.y = 10;
+	backR.w = midR.w = frontR.w = 324;
+	backR.h = midR.h = frontR.h = 42;
+
+	key1 = key2 = gen1 = gen2 = gen3 = gen4 = false;
+
+	// Player Health
+	playerHealth = 100.0f;
+	maxHealth = 100.0f;
+
 	active = true;
 
 	speed = 200.0f;
@@ -120,11 +135,10 @@ void Player::Draw(SDL_Renderer *renderer){
 	// Draw the player texture using the vars texture and posRect
 	SDL_RenderCopyEx(renderer, texture, NULL, &posRect, playerangle, &center, SDL_FLIP_NONE);
 
-
-}
-
-void Player::Reset(){
-
+	// Draw Health bar
+	SDL_RenderCopy(renderer, back, NULL, &backR);
+	SDL_RenderCopy(renderer, mid, NULL, &midR);
+	SDL_RenderCopy(renderer, front, NULL, &frontR);
 
 }
 
@@ -143,8 +157,6 @@ void Player::OnControllerAxis(Sint16 X, Sint16 Y){
 }
 
 void Player::OnControllerButton(const SDL_ControllerButtonEvent event){
-
-	cout << "fire" << endl;
 
 	//if josytick is 0
 	if (event.which == 0) {
@@ -178,9 +190,9 @@ void  Player::CreateBullet(){
 
 			// Finishing aligning to the players center using the texture width
 			bulletList[i].posRect.x = (bulletList[i].posRect.x
-				- (bulletList[i].posRect.w / 2));
+					- (bulletList[i].posRect.w / 2));
 			bulletList[i].posRect.y = (bulletList[i].posRect.y
-				- (bulletList[i].posRect.h / 2));
+					- (bulletList[i].posRect.h / 2));
 
 			// Set the x and y position of the bullets float position
 			bulletList[i].pos_X = bulletList[i].posRect.x;
@@ -204,3 +216,39 @@ void  Player::CreateBullet(){
 	}
 
 }
+
+void Player::Reset(){
+
+	playerHealth = 100.0f;
+
+	midR.w = playerHealth / maxHealth * 324;
+
+	posRect.x = 950.0f;
+	posRect.y = 400.0f;
+
+	pos_X = posRect.x;
+	pos_Y = posRect.y;
+
+}
+
+void Player::eZombieHit(){
+
+	playerHealth -= .0025f;
+
+	midR.w = playerHealth / maxHealth * 324;
+}
+
+void Player::eBulletHit(){
+
+	playerHealth -= 5;
+
+	midR.w = playerHealth / maxHealth * 324;
+
+}
+
+void Player::GiveHealth(){
+
+	playerHealth += 75;
+
+}
+

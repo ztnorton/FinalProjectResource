@@ -28,7 +28,7 @@ Zombie::Zombie(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	center.x = 26;
 	center.y = 25;
 
-	health = 6;
+	health = 8;
 
 }
 
@@ -39,7 +39,7 @@ void Zombie::Update(float deltaTime, SDL_Rect playerRect){
 
 	double calcdistance = sqrt(distancex + distancey);
 
-	if (calcdistance <= 350){
+	if (calcdistance <= 450){
 		active = true;
 	}else{
 		active = false;
@@ -71,7 +71,7 @@ void Zombie::Update(float deltaTime, SDL_Rect playerRect){
 
 void Zombie::RemoveHealth(){
 
-	health -= 1;
+	health = health - 1;
 
 	if (health <= 0){
 		Reset();
@@ -81,9 +81,17 @@ void Zombie::RemoveHealth(){
 
 void Zombie::Reset(){
 
-	zombieRect.x = -1000;
+	int kX = (rand() % 1024);
+
+	int kY = (rand() % 768);
+
+	zombieRect.x = kX;
 
 	posZ_X = zombieRect.x;
+
+	zombieRect.y = kY;
+
+	posZ_Y = zombieRect.y;
 
 	health = 6;
 
