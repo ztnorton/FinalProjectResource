@@ -60,7 +60,7 @@ Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	bulletPath = filePath + "bullet.png";
 
 	// Create Bullet Pool
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 20; i++) {
 		PlayerBullet tmpBullet(renderer, bulletPath, -1000, -1000, 0, 0);
 		bulletList.push_back(tmpBullet);
 	}
@@ -218,6 +218,8 @@ void  Player::CreateBullet(){
 }
 
 void Player::Reset(){
+
+	key1 = key2 = gen1 = gen2 = gen3 = gen4 = false;
 
 	playerHealth = 100.0f;
 

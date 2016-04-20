@@ -2,7 +2,7 @@
 
 PlayerBullet::PlayerBullet(SDL_Renderer *renderer, string filePath, float x, float y, int dirX, int dirY){
 
-	active = true;
+	active = false;
 
 	speed = 900.0f;
 
@@ -58,14 +58,7 @@ void PlayerBullet::Draw(SDL_Renderer *renderer){
 
 void PlayerBullet::Reset(){
 
-
-	active = false;
-
-	posRect.x = -550;
-
-	posRect.y = -550;
-
+	posRect.x = -1000;
 	pos_X = posRect.x;
-	pos_Y = posRect.y;
-
+	active = false;
 }

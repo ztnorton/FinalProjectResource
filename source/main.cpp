@@ -268,10 +268,17 @@ int main(int argc, char* argv[]) {
 	Button playAgainN (renderer, images_dir.c_str(), "playN.png", 750.0f, 55.0f);
 	Button continueN (renderer, images_dir.c_str(), "continueN.png", 750.0f, 55.0f);
 
+
 	// **** Create ITEMS
 	Item key1 (renderer, images_dir.c_str(), 0 , -100, -100);
 	Item key2 (renderer, images_dir.c_str(), 0 , -100, -100);
+	Item lvl1Gate (renderer, images_dir.c_str(), 4 , 58, 194);
 
+	Item generator1 (renderer, images_dir.c_str(), 1 , -100, -100);
+	Item generator2 (renderer, images_dir.c_str(), 1 , -100, -100);
+	Item generator3 (renderer, images_dir.c_str(), 1 , -100, -100);
+	Item generator4 (renderer, images_dir.c_str(), 1 , -100, -100);
+	Item lvl2Gate (renderer, images_dir.c_str(), 5 , 0, 302);
 
 
 	// **** MAIN LOOP GAME START ****
@@ -431,6 +438,8 @@ int main(int argc, char* argv[]) {
 		case LEVEL1:
 			level1 = true;
 
+			player.Reset();
+
 			zombieList.clear();
 
 			//create zombies
@@ -477,23 +486,6 @@ int main(int argc, char* argv[]) {
 								player.OnControllerButton(e.cbutton);
 								break;
 							}
-							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_X) {
-
-								level1 = false;
-								gameState = LEVEL2;
-							}
-
-							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
-								level1 = false;
-								level1won = true;
-								gameState = WIN;
-							}
-
-							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_Y) {
-								level1 = false;
-								gameState = LOSE;
-							}
-
 						}
 						break;
 
@@ -527,25 +519,31 @@ int main(int argc, char* argv[]) {
 							if (SDL_HasIntersection(&player.bulletList[i].posRect, &zombieList[j].zombieRect)){
 
 
-								player.bulletList[j].Reset();
+								player.bulletList[i].Reset();
 								zombieList[j].RemoveHealth();
 
-								int dropRate = (rand() % 2);
+								if (zombieList[j].killed == true){
 
-								if (dropRate == 1){
+									int dropRate = (rand() % 4);
 
-									if (player.key1 == false && player.key2 == false){
-										key1.Drop(zombieList[j].zombieRect.x, zombieList[j].zombieRect.y);
-										cout << "KEY 1 Drop" << endl;
-									}
+									if (dropRate == 1){
 
-									if ( player.key1 == true && player.key2 == false){
-										key2.Drop(zombieList[j].zombieRect.x, zombieList[j].zombieRect.y);
-										cout << "KEY 2 Drop" << endl;
+										if (player.key1 == false && player.key2 == false){
+											key1.Drop(zombieList[j].zombieRect.x, zombieList[j].zombieRect.y);
+											zombieList[j].Reset();
+										}
 
+										if ( player.key1 == true && player.key2 == false){
+											key2.Drop(zombieList[j].zombieRect.x, zombieList[j].zombieRect.y);
+											zombieList[j].Reset();
+										}
+
+									} else {
+										zombieList[j].Reset();
 									}
 
 									break;
+
 								}
 							}
 						}
@@ -580,7 +578,14 @@ int main(int argc, char* argv[]) {
 					key2.Reset();
 					player.key2 = true;
 				}
-
+				//check for win condition
+				if (SDL_HasIntersection(&player.posRect, &lvl1Gate.posRect)){
+					if (player.key1 == true && player.key2 == true){
+						level1 = false;
+						level1won = true;
+						gameState = WIN;
+					}
+				}
 
 
 				// **** Draw
@@ -594,6 +599,8 @@ int main(int argc, char* argv[]) {
 				key1.Draw(renderer);
 
 				key2.Draw(renderer);
+
+				lvl1Gate.Draw(renderer);
 
 				// Player Draw
 				player.Draw(renderer);
@@ -612,6 +619,14 @@ int main(int argc, char* argv[]) {
 			// *********************************************************************************************************
 		case LEVEL2:
 			level2 = true;
+
+			player.Reset();
+
+			turret1.levelReset( 75.0f, 50.0f);
+			turret2.levelReset(725.0f, 50.0f);
+			turret3.levelReset(725.0f, 580.0f);
+			turret4.levelReset(75.0f, 580.0f);
+
 
 			zombieList.clear();
 
@@ -705,8 +720,11 @@ int main(int argc, char* argv[]) {
 					if(player.bulletList[i].active == true){
 						for (int j = 0; j < zombieList.size(); j++){
 							if (SDL_HasIntersection(&player.bulletList[i].posRect, &zombieList[j].zombieRect)){
-								player.bulletList[j].Reset();
 								zombieList[j].RemoveHealth();
+								if (zombieList[j].killed){
+									zombieList[j].Reset();
+								}
+								player.bulletList[i].Reset();
 								break;
 							}
 						}
@@ -725,10 +743,90 @@ int main(int argc, char* argv[]) {
 						if (player.playerHealth <= 0){
 
 							player.Reset();
-							level1 = false;
+							level2 = false;
 							gameState = LOSE;
 							break;
 						}
+					}
+				}
+
+				// **** check for player hitting turrets
+				for (int i = 0; i < player.bulletList.size(); i++) {
+					if(player.bulletList[i].active == true){
+
+						if (SDL_HasIntersection(&player.bulletList[i].posRect, &turret1.baseRect)){
+							player.bulletList[i].Reset();
+							turret1.RemoveHealth();
+
+							if (turret1.killed == true){
+								generator1.Drop(turret1.baseRect.x, turret1.baseRect.y);
+								turret1.Reset();
+								break;
+							}
+						}
+
+
+
+						if (SDL_HasIntersection(&player.bulletList[i].posRect, &turret2.baseRect)){
+							player.bulletList[i].Reset();
+							turret2.RemoveHealth();
+
+							if (turret2.killed == true){
+								generator2.Drop(turret2.baseRect.x, turret2.baseRect.y);
+								turret2.Reset();
+								break;
+							}
+
+						}
+
+						if (SDL_HasIntersection(&player.bulletList[i].posRect, &turret3.baseRect)){
+							player.bulletList[i].Reset();
+							turret3.RemoveHealth();
+
+							if (turret3.killed == true){
+								generator3.Drop(turret3.baseRect.x, turret3.baseRect.y);
+								turret3.Reset();
+								break;
+							}
+						}
+
+						if (SDL_HasIntersection(&player.bulletList[i].posRect, &turret4.baseRect)){
+							player.bulletList[i].Reset();
+							turret4.RemoveHealth();
+
+							if (turret4.killed == true){
+								generator4.Drop(turret4.baseRect.x, turret4.baseRect.y);
+								turret4.Reset();
+								break;
+							}
+						}
+
+					}
+				}
+
+				if (SDL_HasIntersection(&player.posRect, &generator1.posRect)){
+					generator1.Reset();
+					player.gen1 = true;
+				}
+				if (SDL_HasIntersection(&player.posRect, &generator2.posRect)){
+					generator2.Reset();
+					player.gen2 = true;
+				}
+				if (SDL_HasIntersection(&player.posRect, &generator3.posRect)){
+					generator3.Reset();
+					player.gen3 = true;
+				}
+				if (SDL_HasIntersection(&player.posRect, &generator4.posRect)){
+					generator4.Reset();
+					player.gen4 = true;
+				}
+
+				//check for win condition
+				if (SDL_HasIntersection(&player.posRect, &lvl2Gate.posRect)){
+					if (player.gen1 == true && player.gen2 == true && player.gen3 == true && player.gen4 == true){
+						level1won = false;
+						level2 = false;
+						gameState = WIN;
 					}
 				}
 
@@ -738,6 +836,13 @@ int main(int argc, char* argv[]) {
 
 				// Draw the main menu
 				Level2.Draw(renderer);
+
+				lvl2Gate.Draw(renderer);
+
+				generator1.Draw(renderer);
+				generator2.Draw(renderer);
+				generator3.Draw(renderer);
+				generator4.Draw(renderer);
 
 				// Player Draw
 				player.Draw(renderer);
@@ -995,6 +1100,24 @@ int main(int argc, char* argv[]) {
 		case WIN:
 			win = true;
 
+			if (level1won == true){
+
+				playAgainN.posRect.x = -100.0f;
+				playAgainN.posRect.y = -100.0f;
+
+				continueN.posRect.x = 750.0f;
+				continueN.posRect.y = 55.0f;
+
+			} else {
+
+				continueN.posRect.x = -100.0f;
+				continueN.posRect.y = -100.0f;
+
+				playAgainN.posRect.x = 750.0f;
+				playAgainN.posRect.y = 55.0f;
+
+			}
+
 			cout << "The Game State is WIN..." << endl;
 
 			while (win){
@@ -1031,6 +1154,11 @@ int main(int argc, char* argv[]) {
 									gameState = MENU;
 									menuOver = false;
 								}
+								if (playAgainOver) {
+									win = false;
+									gameState = LEVEL1;
+									playAgainOver = false;
+								}
 
 							}
 						}
@@ -1046,6 +1174,7 @@ int main(int argc, char* argv[]) {
 				UpdateCursor(deltaTime);
 
 				// check for collision between cursor active state and buttons
+				playAgainOver = SDL_HasIntersection(&activePos, &playAgainN.posRect);
 				continueOver = SDL_HasIntersection(&activePos, &continueN.posRect);
 				menuOver = SDL_HasIntersection(&activePos, &mainN.posRect);
 
@@ -1056,12 +1185,23 @@ int main(int argc, char* argv[]) {
 				// Draw the main menu
 				Win.Draw(renderer);
 
-				if(continueOver){
-					continueN.Draw(renderer, continueN.posRect);
-					selected.Draw(renderer, continueN.posRect);
-				}else{
-					continueN.Draw(renderer, continueN.posRect);
+				if (level1won == true){
+					if(continueOver){
+						continueN.Draw(renderer, continueN.posRect);
+						selected.Draw(renderer, continueN.posRect);
+					}else{
+						continueN.Draw(renderer, continueN.posRect);
+					}
+				} else {
+
+					if(playAgainOver){
+						playAgainN.Draw(renderer, playAgainN.posRect);
+						selected.Draw(renderer, playAgainN.posRect);
+					}else{
+						playAgainN.Draw(renderer, playAgainN.posRect);
+					}
 				}
+
 				if(menuOver){
 					mainN.Draw(renderer, mainN.posRect);
 					selected.Draw(renderer, mainN.posRect);

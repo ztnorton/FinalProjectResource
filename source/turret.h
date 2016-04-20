@@ -38,6 +38,9 @@ public:
 
 	// Is turret alive?
 	bool active;
+	bool killed;
+
+	int health;
 
 	// Var to hold bullets
 	vector<TurretBullet> bulletList;
@@ -65,27 +68,28 @@ public:
 	float fireTime = 0.0f;
 	float fireRate = 1000.0f; // one second
 
-	// Float for the turret's pos to avoid percision loss
+	// Float for the turret's pos to avoid precision loss
 	float posB_X, posB_Y, posT_X, posT_Y, posR_X, posR_Y;
 
 	// Audio sound effect - CHUNK
 	Mix_Chunk *fire;
 
-	// Turrets creation method using passed in values for renderer, player number, path to texture starting postion X, starting postition Y
+	// Turrets creation method using passed in values for renderer, player number, path to texture starting position X, starting position Y
 	Turret(SDL_Renderer *renderer, string filePath, string audioPath, float x,
 			float y);
 
-	// Update player using the passed in deltaTime
 	void Update(float deltaTime, SDL_Rect tankRect);
 
-	// Draw the player main's passed in renderer
 	void Draw(SDL_Renderer *renderer);
 
-	// Reset Player
 	void Reset();
+
+	void levelReset(float x, float y);
 
 	// Create a Bullet
 	void CreateBullet(SDL_Rect target);
+
+	void RemoveHealth();
 
 	void TankMoveX(float tankSpeed, float deltaTime);
 

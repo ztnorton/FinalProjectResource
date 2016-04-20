@@ -35,6 +35,7 @@ class Zombie {
 public:
 
 	bool active;
+	bool killed;
 
 	// Hold path to texture
 	string zombiePath;

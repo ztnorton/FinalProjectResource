@@ -19,6 +19,14 @@ Item::Item(SDL_Renderer *renderer, string dirPath, int i, float x, float y){
 		itemPath = dirPath + "ammBox.png";
 		texture = IMG_LoadTexture(renderer, itemPath.c_str());
 		itemType = i;
+	} else if (i == 4) {
+		itemPath = dirPath + "lvl1Gate.png";
+		texture = IMG_LoadTexture(renderer, itemPath.c_str());
+		itemType = i;
+	} else if (i == 5) {
+		itemPath = dirPath + "lvl2Gate.png";
+		texture = IMG_LoadTexture(renderer, itemPath.c_str());
+		itemType = i;
 	}
 
 	active = false;

@@ -3,6 +3,7 @@
 Zombie::Zombie(SDL_Renderer *renderer, string filePath, string audioPath, float x, float y){
 
 	active = false;
+	killed = false;
 
 	//death = Mix_LoadWAV((audioPath + "fire.wav").c_str());
 
@@ -28,7 +29,7 @@ Zombie::Zombie(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	center.x = 26;
 	center.y = 25;
 
-	health = 8;
+	health = 3;
 
 }
 
@@ -71,10 +72,12 @@ void Zombie::Update(float deltaTime, SDL_Rect playerRect){
 
 void Zombie::RemoveHealth(){
 
-	health = health - 1;
+	health -= 1;
+
+	cout << "Zombie Health : " << health << endl;
 
 	if (health <= 0){
-		Reset();
+		killed = true;
 	}
 }
 
@@ -93,9 +96,10 @@ void Zombie::Reset(){
 
 	posZ_Y = zombieRect.y;
 
-	health = 6;
+	health = 3;
 
-	active = false;
+	killed = false;
+
 }
 
 

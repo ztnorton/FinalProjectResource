@@ -6,6 +6,9 @@ Turret::Turret(SDL_Renderer *renderer, string filePath, string audioPath, float 
 
 	// Activate turret
 	active = true;
+	killed = false;
+
+	health = 4;
 
 	// Load tank fire sound
 	fire = Mix_LoadWAV((audioPath + "fire.wav").c_str());
@@ -68,10 +71,10 @@ Turret::Turret(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	string bulletPath = filePath + "turretBullet.png";
 
 	// Create Bullet Pool
-		for (int i = 0; i < 5; i++) {
-			TurretBullet tmpBullet(renderer, bulletPath, 1500, 1500);
-			bulletList.push_back(tmpBullet);
-		}
+	for (int i = 0; i < 5; i++) {
+		TurretBullet tmpBullet(renderer, bulletPath, 1500, 1500);
+		bulletList.push_back(tmpBullet);
+	}
 
 	// Random null init
 	srand(time(NULL));
@@ -156,7 +159,7 @@ void Turret::Update(float deltaTime, SDL_Rect tankRect) {
 			CreateBullet(tankRect);
 		}
 
-		fireTime = SDL_GetTicks() + (rand() % 10 + 1) * 1000;
+		fireTime = SDL_GetTicks() + (rand() % 5 + 1) * 1000;
 
 	}
 
@@ -185,7 +188,7 @@ void Turret::CreateBullet(SDL_Rect target) {
 			// Set bullet to active
 			bulletList[i].active = true;
 
-//			 Use the same math in the x position to get the bullet close to the center of the player using player width
+			//			 Use the same math in the x position to get the bullet close to the center of the player using player width
 			bulletList[i].posRect.x = ((baseRect.x + (baseRect.w / 2)) - (bulletList[i].posRect.w / 2));
 			bulletList[i].posRect.y = ((baseRect.y + (baseRect.h / 2)) - (bulletList[i].posRect.h / 2));
 
@@ -197,4 +200,57 @@ void Turret::CreateBullet(SDL_Rect target) {
 			break;
 		}
 	}
+}
+
+void Turret::RemoveHealth(){
+
+	health -= 1;
+
+	if (health <= 0){
+		killed = true;
+	}
+}
+
+void Turret::Reset(){
+
+	baseRect.x = -1000;
+	barrelRect.x = -1000;
+	roofRect.x = -1000;
+
+	baseRect.y = -1000;
+	barrelRect.y = -1000;
+	roofRect.y = -1000;
+
+	posB_X = baseRect.x;
+	posB_Y = baseRect.y;
+
+	posT_X = barrelRect.x;
+	posT_Y = barrelRect.y;
+
+	posR_X = roofRect.x;
+	posR_Y = roofRect.y;
+
+	active = false;
+}
+
+void Turret::levelReset(float x, float y){
+
+	baseRect.x = x;
+		barrelRect.x = x + 88;
+		roofRect.x = x + 16;
+
+		baseRect.y = y;
+		barrelRect.y = y + 65;
+		roofRect.y = y + 15;
+
+		posB_X = baseRect.x;
+		posB_Y = baseRect.y;
+
+		posT_X = barrelRect.x;
+		posT_Y = barrelRect.y;
+
+		posR_X = roofRect.x;
+		posR_Y = roofRect.y;
+
+		active = true;
 }
