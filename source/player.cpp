@@ -250,7 +250,7 @@ void Player::eBulletHit(){
 
 void Player::GiveHealth(){
 
-	playerHealth += 75;
+	playerHealth += 50;
 
 }
 
