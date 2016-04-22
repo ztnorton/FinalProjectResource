@@ -71,3 +71,13 @@ void Item::Drop(int x, int y){
 	}
 
 }
+
+void Item::MoveToHUD(int x, int y){
+
+			posRect.y = y;
+			posRect.x = x;
+			pos_X = posRect.x;
+			pos_Y = posRect.y;
+
+
+}

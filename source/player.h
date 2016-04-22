@@ -40,8 +40,14 @@ public:
 	// Player health
 	float playerHealth, maxHealth;
 
+	// Textures for health bar
+		SDL_Texture *aBack, *aMid, *aFront;
+
+		// Player's SDL_Rect for the X,Y,W, and H for Texture
+		SDL_Rect aBackR, aMidR, aFrontR;
+
 	//Player ammo
-	int ammo;
+	float ammo, maxAmmo;
 
 	// Is the player active - still alive?
 	bool active;

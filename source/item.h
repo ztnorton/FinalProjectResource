@@ -52,6 +52,8 @@ public:
 
 	void Drop(int x, int y);
 
+	void MoveToHUD(int x, int y);
+
 	void Draw(SDL_Renderer *renderer);
 
 };

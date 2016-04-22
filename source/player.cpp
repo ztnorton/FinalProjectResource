@@ -15,12 +15,21 @@ Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	backR.w = midR.w = frontR.w = 324;
 	backR.h = midR.h = frontR.h = 42;
 
+	aMid = IMG_LoadTexture(renderer, (filePath + "ammoMid.png").c_str());
+	aFront = IMG_LoadTexture(renderer, (filePath + "ammoFront.png").c_str());
+
+	aMidR.x = 796; aFrontR.x = 781;
+	aMidR.y = 12;  aFrontR.y = 10;
+	aMidR.w = 172; aFrontR.w = 190;
+	aMidR.h = 53;  aFrontR.h = 57;
+
 	key1 = key2 = gen1 = gen2 = gen3 = gen4 = false;
 
 	// Player Health
 	playerHealth = 100.0f;
 	maxHealth = 100.0f;
 	ammo = 30;
+	maxAmmo = 30;
 
 	active = true;
 
@@ -141,6 +150,8 @@ void Player::Draw(SDL_Renderer *renderer) {
 	SDL_RenderCopy(renderer, mid, NULL, &midR);
 	SDL_RenderCopy(renderer, front, NULL, &frontR);
 
+	SDL_RenderCopy(renderer, aFront, NULL, &aFrontR);
+	SDL_RenderCopy(renderer, aMid, NULL, &aMidR);
 }
 
 void Player::OnControllerAxis(Sint16 X, Sint16 Y) {
@@ -186,6 +197,8 @@ void  Player::CreateBullet() {
 				// Play the Fire sound - plays fine through levels, must pause for QUIT
 				Mix_PlayChannel(-1, fire, 0);
 
+				aMidR.w = ammo / maxAmmo * 172;
+
 				// Set bullet to active
 				bulletList[i].active = true;
 
@@ -195,9 +208,9 @@ void  Player::CreateBullet() {
 
 				// Finishing aligning to the players center using the texture width
 				bulletList[i].posRect.x = (bulletList[i].posRect.x
-					- (bulletList[i].posRect.w / 2));
+						- (bulletList[i].posRect.w / 2));
 				bulletList[i].posRect.y = (bulletList[i].posRect.y
-					- (bulletList[i].posRect.h / 2));
+						- (bulletList[i].posRect.h / 2));
 
 				// Set the x and y position of the bullets float position
 				bulletList[i].pos_X = bulletList[i].posRect.x;
@@ -228,7 +241,10 @@ void Player::Reset() {
 
 	playerHealth = 100.0f;
 
+	ammo = 30;
+
 	midR.w = playerHealth / maxHealth * 324;
+	aMidR.w = ammo / maxAmmo * 172;
 
 	posRect.x = 950.0f;
 	posRect.y = 400.0f;
@@ -261,6 +277,8 @@ void Player::GiveHealth() {
 
 void Player::GiveAmmo() {
 
-	ammo += 30;
+	ammo = 30;
+
+	aMidR.w = ammo / maxAmmo * 172;
 
 }

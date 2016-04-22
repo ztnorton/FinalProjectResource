@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
 
 	// Create an application window with the following settings:
 	window = SDL_CreateWindow("CELL BLOCK Z", SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_SHOWN);
+			SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_SHOWN);
 
 	// Create an SDL RenderTarget
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -220,8 +220,9 @@ int main(int argc, char* argv[]) {
 	Menu Instructions = Menu(renderer, images_dir.c_str(), "instructions.png", 0.0f, 0.0f);
 	Menu Backstory = Menu(renderer, images_dir.c_str(), "backstory.png", 0.0f, 0.0f);
 	Menu BarrelBackInst = Menu(renderer, images_dir.c_str(), "barrelBackInst.png", 0.0f, 0.0f);
-	Menu Win = Menu(renderer, images_dir.c_str(), "winLose.png", 0.0f, 0.0f);
-	Menu Lose = Menu(renderer, images_dir.c_str(), "winLose.png", 0.0f, 0.0f);
+	Menu Win1 = Menu(renderer, images_dir.c_str(), "win1.png", 0.0f, 0.0f);
+	Menu Win2 = Menu(renderer, images_dir.c_str(), "win2.png", 0.0f, 0.0f);
+	Menu Lose = Menu(renderer, images_dir.c_str(), "lose.png", 0.0f, 0.0f);
 
 	// **** Set Up Game State Enumerators
 	enum GameState {
@@ -289,9 +290,9 @@ int main(int argc, char* argv[]) {
 	while (!quit) {
 
 		switch (gameState) {
-			// *********************************************************************************************************
-			// *********************************************************************************************************
-			// *********************************************************************************************************
+		// *********************************************************************************************************
+		// *********************************************************************************************************
+		// *********************************************************************************************************
 		case MENU:
 			menu = true;
 
@@ -305,7 +306,7 @@ int main(int argc, char* argv[]) {
 			startN.posRect.y = 419.0f;
 
 			cout << "The Game State is Menu..." << endl;
-	
+
 			while (menu) {
 
 				// Create deltaTime
@@ -443,6 +444,8 @@ int main(int argc, char* argv[]) {
 			level1 = true;
 
 			player.Reset();
+			key1.Reset();
+			key2.Reset();
 
 			zombieList.clear();
 
@@ -497,9 +500,9 @@ int main(int argc, char* argv[]) {
 
 				// Get x and Y values from game controller
 				const Sint16 Xvalue = SDL_GameControllerGetAxis(gGameControllerO,
-					SDL_CONTROLLER_AXIS_LEFTX);
+						SDL_CONTROLLER_AXIS_LEFTX);
 				const Sint16 Yvalue = SDL_GameControllerGetAxis(gGameControllerO,
-					SDL_CONTROLLER_AXIS_LEFTY);
+						SDL_CONTROLLER_AXIS_LEFTY);
 
 				// Pass values to method
 				player.OnControllerAxis(Xvalue, Yvalue);
@@ -593,10 +596,12 @@ int main(int argc, char* argv[]) {
 				if (SDL_HasIntersection(&player.posRect, &key1.posRect)) {
 					key1.Reset();
 					player.key1 = true;
+					key1.MoveToHUD(458, 11);
 				}
 				if (SDL_HasIntersection(&player.posRect, &key2.posRect)) {
 					key2.Reset();
 					player.key2 = true;
+					key2.MoveToHUD(521, 11);
 				}
 				//check for win condition
 				if (SDL_HasIntersection(&player.posRect, &lvl1Gate.posRect)) {
@@ -655,6 +660,11 @@ int main(int argc, char* argv[]) {
 			level2 = true;
 
 			player.Reset();
+			generator1.Reset();
+			generator2.Reset();
+			generator3.Reset();
+			generator4.Reset();
+
 
 			turret1.levelReset(75.0f, 50.0f);
 			turret2.levelReset(725.0f, 50.0f);
@@ -717,9 +727,9 @@ int main(int argc, char* argv[]) {
 
 				// Get x and Y values from game controller
 				const Sint16 Xvalue = SDL_GameControllerGetAxis(gGameControllerO,
-					SDL_CONTROLLER_AXIS_LEFTX);
+						SDL_CONTROLLER_AXIS_LEFTX);
 				const Sint16 Yvalue = SDL_GameControllerGetAxis(gGameControllerO,
-					SDL_CONTROLLER_AXIS_LEFTY);
+						SDL_CONTROLLER_AXIS_LEFTY);
 
 				// Pass values to method
 				player.OnControllerAxis(Xvalue, Yvalue);
@@ -752,7 +762,7 @@ int main(int argc, char* argv[]) {
 
 										int dropRate = (rand() % 4);
 
-										 if (dropRate == 2) {
+										if (dropRate == 2) {
 											if (health.active == false) {
 												health.Drop(zombieList[j].zombieRect.x, zombieList[j].zombieRect.y);
 												zombieList[j].Reset();
@@ -859,18 +869,22 @@ int main(int argc, char* argv[]) {
 				if (SDL_HasIntersection(&player.posRect, &generator1.posRect)) {
 					generator1.Reset();
 					player.gen1 = true;
+					generator1.MoveToHUD(407,15);
 				}
 				if (SDL_HasIntersection(&player.posRect, &generator2.posRect)) {
 					generator2.Reset();
 					player.gen2 = true;
+					generator2.MoveToHUD(461,15);
 				}
 				if (SDL_HasIntersection(&player.posRect, &generator3.posRect)) {
 					generator3.Reset();
 					player.gen3 = true;
+					generator3.MoveToHUD(515,15);
 				}
 				if (SDL_HasIntersection(&player.posRect, &generator4.posRect)) {
 					generator4.Reset();
 					player.gen4 = true;
+					generator4.MoveToHUD(569,15);
 				}
 
 				//ammo
@@ -1174,22 +1188,16 @@ int main(int argc, char* argv[]) {
 			win = true;
 
 			if (level1won == true) {
-
 				playAgainN.posRect.x = -100.0f;
 				playAgainN.posRect.y = -100.0f;
-
 				continueN.posRect.x = 750.0f;
 				continueN.posRect.y = 55.0f;
-
 			}
 			else {
-
 				continueN.posRect.x = -100.0f;
 				continueN.posRect.y = -100.0f;
-
 				playAgainN.posRect.x = 750.0f;
 				playAgainN.posRect.y = 55.0f;
-
 			}
 
 			cout << "The Game State is WIN..." << endl;
@@ -1256,8 +1264,13 @@ int main(int argc, char* argv[]) {
 				//Clear the SDL RenderTarget
 				SDL_RenderClear(renderer);
 
-				// Draw the main menu
-				Win.Draw(renderer);
+				// Draw the bkgd
+				if (level1won == true) {
+					Win1.Draw(renderer);
+				}
+				else {
+					Win2.Draw(renderer);
+				}
 
 				if (level1won == true) {
 					if (continueOver) {
