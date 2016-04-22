@@ -74,8 +74,6 @@ void Zombie::RemoveHealth(){
 
 	health -= 1;
 
-	cout << "Zombie Health : " << health << endl;
-
 	if (health <= 0){
 		killed = true;
 	}

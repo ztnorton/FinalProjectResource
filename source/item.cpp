@@ -16,7 +16,7 @@ Item::Item(SDL_Renderer *renderer, string dirPath, int i, float x, float y){
 		texture = IMG_LoadTexture(renderer, itemPath.c_str());
 		itemType = i;
 	} else if (i == 3) {
-		itemPath = dirPath + "ammBox.png";
+		itemPath = dirPath + "ammoBox.png";
 		texture = IMG_LoadTexture(renderer, itemPath.c_str());
 		itemType = i;
 	} else if (i == 4) {
@@ -53,7 +53,7 @@ void Item::Draw(SDL_Renderer *renderer){
 
 void Item::Reset(){
 
-	posRect.x = 5000;
+	posRect.x = -500;
 
 	pos_X = posRect.x;
 

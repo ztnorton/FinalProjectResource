@@ -4,7 +4,7 @@
 // Analog joy stick dead zone
 const int JOYSTICK_DEAD_ZONE = 8000;
 
-Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float x, float y){
+Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float x, float y) {
 
 	back = IMG_LoadTexture(renderer, (filePath + "HPback.png").c_str());
 	mid = IMG_LoadTexture(renderer, (filePath + "HPmid.png").c_str());
@@ -20,6 +20,7 @@ Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	// Player Health
 	playerHealth = 100.0f;
 	maxHealth = 100.0f;
+	ammo = 30;
 
 	active = true;
 
@@ -67,7 +68,7 @@ Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float 
 
 }
 
-void Player::Update(float deltaTime){
+void Player::Update(float deltaTime) {
 
 	// Check for game pad input
 	if (Xvalue != 0 || Yvalue != 0) {
@@ -123,7 +124,7 @@ void Player::Update(float deltaTime){
 
 }
 
-void Player::Draw(SDL_Renderer *renderer){
+void Player::Draw(SDL_Renderer *renderer) {
 
 	// Draw Bullets
 	for (int i = 0; i < bulletList.size(); i++) {
@@ -142,7 +143,7 @@ void Player::Draw(SDL_Renderer *renderer){
 
 }
 
-void Player::OnControllerAxis(Sint16 X, Sint16 Y){
+void Player::OnControllerAxis(Sint16 X, Sint16 Y) {
 
 	Xvalue = X;
 	Yvalue = Y;
@@ -156,7 +157,7 @@ void Player::OnControllerAxis(Sint16 X, Sint16 Y){
 
 }
 
-void Player::OnControllerButton(const SDL_ControllerButtonEvent event){
+void Player::OnControllerButton(const SDL_ControllerButtonEvent event) {
 
 	//if josytick is 0
 	if (event.which == 0) {
@@ -170,54 +171,58 @@ void Player::OnControllerButton(const SDL_ControllerButtonEvent event){
 
 }
 
-void  Player::CreateBullet(){
+void  Player::CreateBullet() {
 
-	// If there is a active bullet to fire
-	for (int i = 0; i < bulletList.size(); i++) {
+	if (ammo > 0) {
 
-		// If the bullet is not active
-		if (bulletList[i].active == false) {
+		ammo -= 1;
 
-			// Play the Fire sound - plays fine through levels, must pause for QUIT
-			Mix_PlayChannel(-1, fire, 0);
+		// If there is a active bullet to fire
+		for (int i = 0; i < bulletList.size(); i++) {
 
-			// Set bullet to active
-			bulletList[i].active = true;
+			// If the bullet is not active
+			if (bulletList[i].active == false) {
 
-			// Use the same math in the x position to get the bullet close to the center of the player using player width
-			bulletList[i].posRect.x = (posRect.x + (posRect.w / 2));
-			bulletList[i].posRect.y = (posRect.y + (posRect.h / 2));
+				// Play the Fire sound - plays fine through levels, must pause for QUIT
+				Mix_PlayChannel(-1, fire, 0);
 
-			// Finishing aligning to the players center using the texture width
-			bulletList[i].posRect.x = (bulletList[i].posRect.x
+				// Set bullet to active
+				bulletList[i].active = true;
+
+				// Use the same math in the x position to get the bullet close to the center of the player using player width
+				bulletList[i].posRect.x = (posRect.x + (posRect.w / 2));
+				bulletList[i].posRect.y = (posRect.y + (posRect.h / 2));
+
+				// Finishing aligning to the players center using the texture width
+				bulletList[i].posRect.x = (bulletList[i].posRect.x
 					- (bulletList[i].posRect.w / 2));
-			bulletList[i].posRect.y = (bulletList[i].posRect.y
+				bulletList[i].posRect.y = (bulletList[i].posRect.y
 					- (bulletList[i].posRect.h / 2));
 
-			// Set the x and y position of the bullets float position
-			bulletList[i].pos_X = bulletList[i].posRect.x;
-			bulletList[i].pos_Y = bulletList[i].posRect.y;
+				// Set the x and y position of the bullets float position
+				bulletList[i].pos_X = bulletList[i].posRect.x;
+				bulletList[i].pos_Y = bulletList[i].posRect.y;
 
-			// IF the tank is moving, fire in that Direction
-			if (Xvalue != 0 || Yvalue != 0) {
-				// Set the x and y pos of the bullet's float pos
-				bulletList[i].playerangle = playerangle;
+				// IF the tank is moving, fire in that Direction
+				if (Xvalue != 0 || Yvalue != 0) {
+					// Set the x and y pos of the bullet's float pos
+					bulletList[i].playerangle = playerangle;
 
+				}
+				else {
+					// If the tank isnt moving, fire the direction currently facing & Set the x and y pos of the bullet's float pos
+					bulletList[i].playerangle = oldAngle;
+
+				}
+
+				// Once bullet is found, break out of loop
+				break;
 			}
-			else {
-				// If the tank isnt moving, fire the direction currently facing & Set the x and y pos of the bullet's float pos
-				bulletList[i].playerangle = oldAngle;
-
-			}
-
-			// Once bullet is found, break out of loop
-			break;
 		}
 	}
-
 }
 
-void Player::Reset(){
+void Player::Reset() {
 
 	key1 = key2 = gen1 = gen2 = gen3 = gen4 = false;
 
@@ -233,24 +238,29 @@ void Player::Reset(){
 
 }
 
-void Player::eZombieHit(){
+void Player::eZombieHit() {
 
-	playerHealth -= .0025f;
+	playerHealth -= .003f;
 
 	midR.w = playerHealth / maxHealth * 324;
 }
 
-void Player::eBulletHit(){
+void Player::eBulletHit() {
 
 	playerHealth -= 5;
 
 	midR.w = playerHealth / maxHealth * 324;
-
 }
 
-void Player::GiveHealth(){
+void Player::GiveHealth() {
 
-	playerHealth += 50;
+	playerHealth = 100 ;
 
+	midR.w = playerHealth / maxHealth * 324;
 }
 
+void Player::GiveAmmo() {
+
+	ammo += 30;
+
+}

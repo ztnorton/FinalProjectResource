@@ -40,6 +40,9 @@ public:
 	// Player health
 	float playerHealth, maxHealth;
 
+	//Player ammo
+	int ammo;
+
 	// Is the player active - still alive?
 	bool active;
 
@@ -107,6 +110,8 @@ public:
 	void eBulletHit();
 
 	void GiveHealth();
+
+	void GiveAmmo();
 
 private:
 

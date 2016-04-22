@@ -305,10 +305,7 @@ int main(int argc, char* argv[]) {
 			startN.posRect.y = 419.0f;
 
 			cout << "The Game State is Menu..." << endl;
-			cout << "B to WIN..." << endl;
-			cout << "X to LOSE..." << endl;
-
-
+	
 			while (menu) {
 
 				// Create deltaTime
@@ -464,7 +461,6 @@ int main(int argc, char* argv[]) {
 
 			cout << "The Game State is LEVEL 1..." << endl;
 			cout << "Press A Button for firing ..." << endl;
-			cout << "Press X Button for LEVEL 2 ..." << endl;
 
 			while (level1) {
 
@@ -549,12 +545,16 @@ int main(int argc, char* argv[]) {
 									else if (dropRate == 2) {
 										if (health.active == false) {
 											health.Drop(zombieList[j].zombieRect.x, zombieList[j].zombieRect.y);
+											zombieList[j].Reset();
+
 										}
 
 									}
 									else if (dropRate == 3) {
 										if (ammo.active == false) {
 											ammo.Drop(zombieList[j].zombieRect.x, zombieList[j].zombieRect.y);
+											zombieList[j].Reset();
+
 										}
 
 									}
@@ -608,10 +608,12 @@ int main(int argc, char* argv[]) {
 				}
 				//ammo
 				if (SDL_HasIntersection(&player.posRect, &ammo.posRect)) {
+					player.GiveAmmo();
 					ammo.Reset();
 				}
 				//health
 				if (SDL_HasIntersection(&player.posRect, &health.posRect)) {
+					player.GiveHealth();
 					health.Reset();
 				}
 
@@ -705,15 +707,6 @@ int main(int argc, char* argv[]) {
 
 								player.OnControllerButton(e.cbutton);
 								break;
-							}
-							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
-								level2 = false;
-								gameState = WIN;
-							}
-
-							if (e.cbutton.button == SDL_CONTROLLER_BUTTON_Y) {
-								level2 = false;
-								gameState = LOSE;
 							}
 
 						}
@@ -882,6 +875,7 @@ int main(int argc, char* argv[]) {
 
 				//ammo
 				if (SDL_HasIntersection(&player.posRect, &ammo.posRect)) {
+					player.GiveAmmo();
 					ammo.Reset();
 				}
 				//health
