@@ -123,14 +123,8 @@ bool startGameOver = false, backstoryOver = false, instructionsOver = false, qui
 #include <SDL2_ttf/SDL_ttf.h>
 #include <unistd.h>
 
-
-// Get current working directory
 string currentWorkingDirectory(getcwd(NULL, 0));
-
-// Create a string linking to the images folder
 string images_dir = currentWorkingDirectory + "/FinalProjectResource/image/";
-
-// Create a string to link to the audio folder
 string audio_dir = currentWorkingDirectory + "/FinalProjectResource/audio/";
 #endif
 
