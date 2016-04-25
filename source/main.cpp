@@ -121,6 +121,8 @@ bool startGameOver = false, backstoryOver = false, instructionsOver = false, qui
 #include <SDL2_image/SDL_image.h>
 #include <SDL2_mixer/SDL_mixer.h>
 #include <SDL2_ttf/SDL_ttf.h>
+#include <unistd.h>
+
 
 // Get current working directory
 string currentWorkingDirectory(getcwd(NULL, 0));
