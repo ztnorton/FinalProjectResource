@@ -8,10 +8,12 @@ Turret::Turret(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	active = true;
 	killed = false;
 
-	health = 4;
+	health = 6;
 
 	// Load tank fire sound
-	fire = Mix_LoadWAV((audioPath + "fire.wav").c_str());
+	fire = Mix_LoadWAV((audioPath + "cannon.wav").c_str());
+	explode = Mix_LoadWAV((audioPath + "explosion.wav").c_str());
+
 
 
 	// Create file path for texture
@@ -159,7 +161,7 @@ void Turret::Update(float deltaTime, SDL_Rect tankRect) {
 			CreateBullet(tankRect);
 		}
 
-		fireTime = SDL_GetTicks() + (rand() % 5 + 1) * 1000;
+		fireTime = SDL_GetTicks() + (rand() % 3 + 1) * 1000;
 
 	}
 
@@ -208,6 +210,7 @@ void Turret::RemoveHealth(){
 
 	if (health <= 0){
 		killed = true;
+		Mix_PlayChannel(-1, explode, 0);
 	}
 }
 

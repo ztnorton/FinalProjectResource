@@ -72,7 +72,7 @@ public:
 	float posB_X, posB_Y, posT_X, posT_Y, posR_X, posR_Y;
 
 	// Audio sound effect - CHUNK
-	Mix_Chunk *fire;
+	Mix_Chunk *fire, *explode;
 
 	// Turrets creation method using passed in values for renderer, player number, path to texture starting position X, starting position Y
 	Turret(SDL_Renderer *renderer, string filePath, string audioPath, float x,

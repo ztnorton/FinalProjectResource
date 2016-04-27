@@ -15,6 +15,7 @@
 #include "zombie.h"
 #include "turret.h"
 #include "item.h"
+#include "explode.h"
 
 using namespace std;
 
@@ -24,7 +25,6 @@ vector<Zombie> zombieList;
 float deltaTime = 0.0;
 int thisTime = 0;
 int lastTime = 0;
-
 
 //**** Joy stick / Cursor
 
@@ -197,7 +197,6 @@ int main(int argc, char* argv[]) {
 	Fire fire2 = Fire(renderer, images_dir, 1, 620, 200);
 	Fire fireBig = Fire(renderer, images_dir, 0, 700, 180);
 
-
 	// **** Create Players
 	Player player = Player(renderer, images_dir.c_str(), audio_dir.c_str(), 950.0f, 384.0f);
 
@@ -207,6 +206,10 @@ int main(int argc, char* argv[]) {
 	Turret turret3(renderer, images_dir, audio_dir, 725.0f, 580.0f);
 	Turret turret4(renderer, images_dir, audio_dir, 75.0f, 580.0f);
 
+	Explode explode1(renderer, images_dir, 500.f, 500.0f);
+	Explode explode2(renderer, images_dir, -1000.f, -1000.0f);
+	Explode explode3(renderer, images_dir, -1000.f, -1000.0f);
+	Explode explode4(renderer, images_dir, -1000.f, -1000.0f);
 
 	// **** Main Menu Textures
 	Menu MainMenu = Menu(renderer, images_dir.c_str(), "mainMenu.png", 0.0f, 0.0f);
@@ -267,18 +270,39 @@ int main(int argc, char* argv[]) {
 
 
 	// **** Create ITEMS
-	Item key1(renderer, images_dir.c_str(), 0, -100, -100);
-	Item key2(renderer, images_dir.c_str(), 0, -100, -100);
-	Item lvl1Gate(renderer, images_dir.c_str(), 4, 58, 194);
+	Item key1(renderer, images_dir.c_str(), audio_dir.c_str(), 0, -100, -100);
+	Item key2(renderer, images_dir.c_str(), audio_dir.c_str(), 0, -100, -100);
+	Item lvl1Gate(renderer, images_dir.c_str(), audio_dir.c_str(), 4, 58, 194);
 
-	Item generator1(renderer, images_dir.c_str(), 1, -100, -100);
-	Item generator2(renderer, images_dir.c_str(), 1, -100, -100);
-	Item generator3(renderer, images_dir.c_str(), 1, -100, -100);
-	Item generator4(renderer, images_dir.c_str(), 1, -100, -100);
-	Item lvl2Gate(renderer, images_dir.c_str(), 5, 0, 302);
+	Item generator1(renderer, images_dir.c_str(), audio_dir.c_str(), 1, -100, -100);
+	Item generator2(renderer, images_dir.c_str(), audio_dir.c_str(), 1, -100, -100);
+	Item generator3(renderer, images_dir.c_str(), audio_dir.c_str(), 1, -100, -100);
+	Item generator4(renderer, images_dir.c_str(), audio_dir.c_str(), 1, -100, -100);
+	Item lvl2Gate(renderer, images_dir.c_str(), audio_dir.c_str(), 5, 0, 302);
 
-	Item health(renderer, images_dir.c_str(), 2, -100, -100);
-	Item ammo(renderer, images_dir.c_str(), 3, -100, -100);
+	Item health(renderer, images_dir.c_str(), audio_dir.c_str(), 2, -100, -100);
+	Item ammo(renderer, images_dir.c_str(), audio_dir.c_str(), 3, -100, -100);
+
+	//**** Create LVL2 Bar
+	// Textures for health bar
+	SDL_Texture *eBar = IMG_LoadTexture(renderer, (images_dir + "genBack.png").c_str());;
+
+	// Player's SDL_Rect for the X,Y,W, and H for Texture
+	SDL_Rect eBarR;
+
+	int wbar, hbar;
+	SDL_QueryTexture(eBar, NULL, NULL, &wbar, &hbar);
+	eBarR.w = 0;
+	eBarR.h = hbar;
+	eBarR.x = 402.0f;
+	eBarR.y = 8.0f;
+
+	float playerEnergy = 0, maxEnergy = 100;
+
+	Mix_Music *menuM = Mix_LoadMUS((audio_dir + "menuMusic.wav").c_str());
+	Mix_Music *lvlM = Mix_LoadMUS((audio_dir + "levelMusic.wav").c_str());
+
+	Mix_FadeInMusic(menuM, 3, 1000);
 
 
 	// **** MAIN LOOP GAME START ****
@@ -290,6 +314,8 @@ int main(int argc, char* argv[]) {
 		// *********************************************************************************************************
 		// *********************************************************************************************************
 		case MENU:
+
+
 			menu = true;
 
 			backstoryN.posRect.x = 386.0f;
@@ -439,6 +465,10 @@ int main(int argc, char* argv[]) {
 		case LEVEL1:
 			level1 = true;
 
+			Mix_FadeOutMusic(1000);
+
+			Mix_FadeInMusic(lvlM, 3, 1000);
+
 			player.Reset();
 			key1.Reset();
 			key2.Reset();
@@ -446,7 +476,7 @@ int main(int argc, char* argv[]) {
 			zombieList.clear();
 
 			//create zombies
-			for (int i = 0; i < 8; i++) {
+			for (int i = 0; i < 9; i++) {
 
 				int kX = (rand() % 1024);
 				int kY = (rand() % 768);
@@ -655,6 +685,9 @@ int main(int argc, char* argv[]) {
 		case LEVEL2:
 			level2 = true;
 
+			playerEnergy = 0;
+			eBarR.w = playerEnergy / maxEnergy * 223;
+
 			player.Reset();
 			generator1.Reset();
 			generator2.Reset();
@@ -671,7 +704,7 @@ int main(int argc, char* argv[]) {
 			zombieList.clear();
 
 			//create zombies
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 5; i++) {
 
 				int kX = (rand() % 1024);
 				int kY = (rand() % 768);
@@ -739,6 +772,10 @@ int main(int argc, char* argv[]) {
 				turret2.Update(deltaTime, player.posRect);
 				turret3.Update(deltaTime, player.posRect);
 				turret4.Update(deltaTime, player.posRect);
+				explode1.Update(deltaTime);
+				explode2.Update(deltaTime);
+				explode3.Update(deltaTime);
+				explode4.Update(deltaTime);
 
 				for (int i = 0; i < zombieList.size(); i++) {
 					zombieList[i].Update(deltaTime, player.posRect);
@@ -818,12 +855,11 @@ int main(int argc, char* argv[]) {
 
 							if (turret1.killed == true) {
 								generator1.Drop(turret1.baseRect.x, turret1.baseRect.y);
+								explode1.makeExplosion(turret1.baseRect.x, turret1.baseRect.y);
 								turret1.Reset();
 								break;
 							}
 						}
-
-
 
 						if (SDL_HasIntersection(&player.bulletList[i].posRect, &turret2.baseRect)) {
 							player.bulletList[i].Reset();
@@ -831,7 +867,8 @@ int main(int argc, char* argv[]) {
 
 							if (turret2.killed == true) {
 								generator2.Drop(turret2.baseRect.x, turret2.baseRect.y);
-								turret2.Reset();
+								explode2.makeExplosion(turret2.baseRect.x, turret2.baseRect.y);
+								turret2.Reset();				
 								break;
 							}
 
@@ -843,6 +880,7 @@ int main(int argc, char* argv[]) {
 
 							if (turret3.killed == true) {
 								generator3.Drop(turret3.baseRect.x, turret3.baseRect.y);
+								explode3.makeExplosion(turret3.baseRect.x, turret3.baseRect.y);
 								turret3.Reset();
 								break;
 							}
@@ -854,6 +892,7 @@ int main(int argc, char* argv[]) {
 
 							if (turret4.killed == true) {
 								generator4.Drop(turret4.baseRect.x, turret4.baseRect.y);
+								explode4.makeExplosion(turret4.baseRect.x, turret4.baseRect.y);
 								turret4.Reset();
 								break;
 							}
@@ -862,25 +901,99 @@ int main(int argc, char* argv[]) {
 					}
 				}
 
+				// **** CHeck for turret hit Player
+				for (int i = 0; i < turret1.bulletList.size(); i++) {
+					if (turret1.bulletList[i].active == true) {
+						if (SDL_HasIntersection(&turret1.bulletList[i].posRect, &player.posRect)) {
+							player.eBulletHit();
+							turret1.bulletList[i].Reset();
+
+							if (player.playerHealth <= 0) {
+
+								player.Reset();
+								level2 = false;
+								gameState = LOSE;
+								break;
+							}
+						}
+					}
+				}
+				for (int i = 0; i < turret2.bulletList.size(); i++) {
+					if (turret2.bulletList[i].active == true) {
+						if (SDL_HasIntersection(&turret2.bulletList[i].posRect, &player.posRect)) {
+							player.eBulletHit();
+							turret2.bulletList[i].Reset();
+
+							if (player.playerHealth <= 0) {
+
+								player.Reset();
+								level2 = false;
+								gameState = LOSE;
+								break;
+							}
+						}
+					}
+				}
+				for (int i = 0; i < turret3.bulletList.size(); i++) {
+					if (turret3.bulletList[i].active == true) {
+						if (SDL_HasIntersection(&turret3.bulletList[i].posRect, &player.posRect)) {
+							player.eBulletHit();
+							turret3.bulletList[i].Reset();
+
+							if (player.playerHealth <= 0) {
+
+								player.Reset();
+								level2 = false;
+								gameState = LOSE;
+								break;
+							}
+						}
+					}
+				}
+				for (int i = 0; i < turret4.bulletList.size(); i++) {
+					if (turret4.bulletList[i].active == true) {
+						if (SDL_HasIntersection(&turret4.bulletList[i].posRect, &player.posRect)) {
+							player.eBulletHit();
+							turret4.bulletList[i].Reset();
+
+							if (player.playerHealth <= 0) {
+
+								player.Reset();
+								level2 = false;
+								gameState = LOSE;
+								break;
+							}
+						}
+					}
+				}
+
 				if (SDL_HasIntersection(&player.posRect, &generator1.posRect)) {
 					generator1.Reset();
 					player.gen1 = true;
-					generator1.MoveToHUD(407,15);
+					generator1.MoveToHUD(-100,-100);
+					playerEnergy += 25;
+					eBarR.w = playerEnergy / maxEnergy * 223;
 				}
 				if (SDL_HasIntersection(&player.posRect, &generator2.posRect)) {
 					generator2.Reset();
 					player.gen2 = true;
-					generator2.MoveToHUD(461,15);
+					generator2.MoveToHUD(-100, -100);
+					playerEnergy += 25;
+					eBarR.w = playerEnergy / maxEnergy * 223;
 				}
 				if (SDL_HasIntersection(&player.posRect, &generator3.posRect)) {
 					generator3.Reset();
 					player.gen3 = true;
-					generator3.MoveToHUD(515,15);
+					generator3.MoveToHUD(-100, -100);
+					playerEnergy += 25;
+					eBarR.w = playerEnergy / maxEnergy * 223;
 				}
 				if (SDL_HasIntersection(&player.posRect, &generator4.posRect)) {
 					generator4.Reset();
 					player.gen4 = true;
-					generator4.MoveToHUD(569,15);
+					generator4.MoveToHUD(-100, -100);
+					playerEnergy += 25;
+					eBarR.w = playerEnergy / maxEnergy * 223;
 				}
 
 				//ammo
@@ -912,6 +1025,8 @@ int main(int argc, char* argv[]) {
 
 				lvl2Gate.Draw(renderer);
 
+				SDL_RenderCopy(renderer, eBar, NULL, &eBarR);
+
 				generator1.Draw(renderer);
 				generator2.Draw(renderer);
 				generator3.Draw(renderer);
@@ -932,6 +1047,11 @@ int main(int argc, char* argv[]) {
 				turret2.Draw(renderer);
 				turret3.Draw(renderer);
 				turret4.Draw(renderer);
+	
+				explode1.Draw(renderer);
+				explode2.Draw(renderer);
+				explode3.Draw(renderer);
+				explode4.Draw(renderer);
 
 				// Present screen render
 				SDL_RenderPresent(renderer);
@@ -1231,6 +1351,10 @@ int main(int argc, char* argv[]) {
 									win = false;
 									gameState = MENU;
 									menuOver = false;
+
+									Mix_FadeOutMusic(1000);
+
+									Mix_FadeInMusic(menuM, 3, 1000);
 								}
 								if (playAgainOver) {
 									win = false;
@@ -1312,6 +1436,13 @@ int main(int argc, char* argv[]) {
 			lose = true;
 			cout << "The Game State is LOSE..." << endl;
 
+			playAgainN.posRect.x = 750.0f;
+			playAgainN.posRect.y = 55.0f;
+
+			Mix_FadeOutMusic(1000);
+
+			Mix_FadeInMusic(menuM, 3, 1000);
+
 			while (lose) {
 
 				//set up frame rate for the section, or CASE
@@ -1341,9 +1472,15 @@ int main(int argc, char* argv[]) {
 									if (level1won == true)
 									{
 										gameState = LEVEL2;
+										Mix_FadeOutMusic(1000);
+
+										Mix_FadeInMusic(lvlM, 3, 1000);
 									}
 									else {
 										gameState = LEVEL1;
+										Mix_FadeOutMusic(1000);
+
+										Mix_FadeInMusic(lvlM, 3, 1000);
 									}
 									playAgainOver = false;
 								}
@@ -1351,6 +1488,8 @@ int main(int argc, char* argv[]) {
 									lose = false;
 									gameState = MENU;
 									menuOver = false;
+
+
 								}
 
 							}

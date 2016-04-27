@@ -86,7 +86,7 @@ public:
 	float oldAngle;
 
 	// Audio sound effect - CHUNK
-	Mix_Chunk *fire;
+	Mix_Chunk *fire, *reload;
 
 	// Add X and Y values
 	Sint16 Xvalue, Yvalue;

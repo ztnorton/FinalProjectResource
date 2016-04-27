@@ -5,7 +5,7 @@ Zombie::Zombie(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	active = false;
 	killed = false;
 
-	//death = Mix_LoadWAV((audioPath + "fire.wav").c_str());
+	death = Mix_LoadWAV((audioPath + "death.wav").c_str());
 
 	string basePath = filePath + "zombie.png";
 
@@ -40,7 +40,7 @@ void Zombie::Update(float deltaTime, SDL_Rect playerRect){
 
 	double calcdistance = sqrt(distancex + distancey);
 
-	if (calcdistance <= 450){
+	if (calcdistance <= 500){
 		active = true;
 	}else{
 		active = false;
@@ -76,6 +76,7 @@ void Zombie::RemoveHealth(){
 
 	if (health <= 0){
 		killed = true;
+		Mix_PlayChannel(-1, death, 0);
 	}
 }
 

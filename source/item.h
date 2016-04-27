@@ -42,11 +42,13 @@ public:
 
 	SDL_Rect posRect;
 
+	Mix_Chunk *Pickup;
+
 	int itemType;
 
 	float pos_X, pos_Y;
 
-	Item(SDL_Renderer *renderer, string dirPath, int i, float x, float y);
+	Item(SDL_Renderer *renderer, string dirPath, string audioPath, int i, float x, float y);
 
 	void Reset();
 

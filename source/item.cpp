@@ -1,33 +1,42 @@
 #include "item.h"
 
 
-Item::Item(SDL_Renderer *renderer, string dirPath, int i, float x, float y){
+Item::Item(SDL_Renderer *renderer, string dirPath, string audioPath, int i, float x, float y){
 
 	if ( i == 0){
 		itemPath = dirPath + "key.png";
 		texture = IMG_LoadTexture(renderer, itemPath.c_str());
 		itemType = i;
+		Pickup = Mix_LoadWAV((audioPath + "pickup.wav").c_str());
 	} else if (i == 1) {
 		itemPath = dirPath + "generator.png";
 		texture = IMG_LoadTexture(renderer, itemPath.c_str());
 		itemType = i;
+		Pickup = Mix_LoadWAV((audioPath + "pickup.wav").c_str());
 	} else if (i == 2) {
 		itemPath = dirPath + "healthKit.png";
 		texture = IMG_LoadTexture(renderer, itemPath.c_str());
 		itemType = i;
+		Pickup = Mix_LoadWAV((audioPath + "pickup.wav").c_str());
 	} else if (i == 3) {
 		itemPath = dirPath + "ammoBox.png";
 		texture = IMG_LoadTexture(renderer, itemPath.c_str());
 		itemType = i;
+		Pickup = Mix_LoadWAV((audioPath + "reload.wav").c_str());
 	} else if (i == 4) {
 		itemPath = dirPath + "lvl1Gate.png";
 		texture = IMG_LoadTexture(renderer, itemPath.c_str());
 		itemType = i;
+		Pickup = Mix_LoadWAV((audioPath + "pickup.wav").c_str());
 	} else if (i == 5) {
 		itemPath = dirPath + "lvl2Gate.png";
 		texture = IMG_LoadTexture(renderer, itemPath.c_str());
 		itemType = i;
+		Pickup = Mix_LoadWAV((audioPath + "pickup.wav").c_str());
 	}
+
+	
+
 
 	active = false;
 
@@ -58,6 +67,8 @@ void Item::Reset(){
 	pos_X = posRect.x;
 
 	active = false;
+
+	Mix_PlayChannel(-1, Pickup, 0);
 
 }
 

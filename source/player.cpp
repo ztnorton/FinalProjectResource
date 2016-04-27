@@ -38,6 +38,7 @@ Player::Player(SDL_Renderer *renderer, string filePath, string audioPath, float 
 	xangle = 0; yangle = 0; playerangle = 0; oldAngle = 0; Xvalue = 0; Yvalue = 0;
 
 	fire = Mix_LoadWAV((audioPath + "fire.wav").c_str());
+	reload = Mix_LoadWAV((audioPath + "reload.wav").c_str());
 
 	playerPath = filePath + "player.png";
 
@@ -263,7 +264,7 @@ void Player::eZombieHit() {
 
 void Player::eBulletHit() {
 
-	playerHealth -= 5;
+	playerHealth -= 5.0f;
 
 	midR.w = playerHealth / maxHealth * 324;
 }
@@ -278,6 +279,8 @@ void Player::GiveHealth() {
 void Player::GiveAmmo() {
 
 	ammo = 30;
+
+	Mix_PlayChannel(-1, reload, 0);
 
 	aMidR.w = ammo / maxAmmo * 172;
 

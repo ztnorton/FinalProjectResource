@@ -37,6 +37,8 @@ public:
 	bool active;
 	bool killed;
 
+	Mix_Chunk *death;
+
 	// Hold path to texture
 	string zombiePath;
 

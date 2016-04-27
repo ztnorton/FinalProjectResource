@@ -8,7 +8,7 @@ TurretBullet::TurretBullet(SDL_Renderer *renderer, string filePath, float x,
 	active = false;
 
 	// Set bullet speed
-	speed = 500.0;
+	speed = 400.0;
 
 	// Create texture
 	texture = IMG_LoadTexture(renderer, filePath.c_str());
